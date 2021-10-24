@@ -1,0 +1,16 @@
+{
+    "name": "/\\Guided Tour",
+    "type": "visualization",
+    "description": "Links to navigate to a sheet",
+    "icon": "play",
+    "version": "0.8.0",
+    "author": "Christof Schwarz",
+    "homepage": "www.databridge.ch",
+    "keywords": "qlik-sense, visualization",
+    "license": "MIT",
+    "repository": "https://github.com/ChristofSchwarz/qs_ext_sheetLinks",
+    "preview": "pics/databridgelogo.png",
+    "dependencies": {
+        "qlik-sense": ">=3.0.x"
+    }
+}
