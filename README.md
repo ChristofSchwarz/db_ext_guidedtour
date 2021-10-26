@@ -16,13 +16,13 @@ below sequence to the extension object under "Dimensions" (you can skip 3, 4, an
 4. Background-color (in css format e.g.: `#0a0b1c`, `rgb(45,45,45)`, `rgba(0,0,0,0.25)`, `darkred` ...)
 5. Text-color (in css format)
 
-The extenion has general settings for the parameters 3, 4 and 5, in case you would like all tooltips to show in *same width* and *same colors*. In that case, you need 
+The extenion has general settings for the parameters 3, 4 and 5, in case you would like all tooltips to show in **same width** and **same colors**. In that case, you need 
 only 2 dimensions. But if you want to style tooltips individually for different objects, you need those colums 3, 4, and 5
 
-Hint: You can omit a column but not change the position, for example if you don't care about the width but want to set a background-color, provide 4 columns: 
+**Hint**: You can omit a column but not change the position, for example if you don't care about the width but want to set a background-color, provide 4 columns: 
 objectId, tooltipText, =Null(), tooltipBgColor
 
-Note: It has no expression (measure). However, the tour will, at start, select a configurable value in a configurable field (the "Tour-Id"). That way, you can 
+**Note**: It has no expression (measure). However, the tour will, at start, select a configurable value in a configurable field (the "Tour-Id"). That way, you can 
 add multiple tours to the datamodel and the correct one will start. 
 Support of Multi-language
 
