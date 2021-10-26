@@ -2,6 +2,8 @@
 
 ## About
 This extension allows to make a sequence of colored tooltips (text bubbles) which highlight certain objects on a worksheet. 
+ ![screenshot](https://raw.githubusercontent.com/ChristofSchwarz/pics/master/guidedtour.gif "Animation")
+
 
 ## How to set up
 To render, it requires a data table loaded by data manager or load script with at least 2 colums, supported are up to 5 columns. Add those in the exact 
