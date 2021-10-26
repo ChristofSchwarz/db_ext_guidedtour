@@ -13,7 +13,7 @@ below sequence to the extension object under "Dimensions" (you can skip 3, 4, an
 1. Qlik objectId
 2. Text for tooltip (can contain html tags, good for formatting or hyperlinks)
 3. Width in pixels (250 is the default; the height will be dynamically determined)
-4. Background-color (in css format: #0a0b1c, rgb(45,45,45), rgba(0,0,0,0.25) ...)
+4. Background-color (in css format e.g.: `#0a0b1c`, `rgb(45,45,45)`, `rgba(0,0,0,0.25)`, `darkred` ...)
 5. Text-color (in css format)
 
 The extenion has general settings for the parameters 3, 4 and 5, in case you would like all tooltips to show in *same width* and *same colors*. In that case, you need 
