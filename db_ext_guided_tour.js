@@ -50,9 +50,10 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
             }
             
             if (isLast) {
+				// after the last item of a tour, show databridge ad for a second
                 $(`#${ownId}_tooltip`).children().css('opacity', 0);
-                $(`#${ownId}_text`).after(`<div style="position:absolute; top:35%; color:${$('#WmVfEd_next').css('color')}; width:100%; left:-3px; text-align:center; font-size:medium;">
-					Tour sponsored by <a href="https://www.databridge.ch" target="_blank" style="color:${$('#WmVfEd_next').css('color')};">data/\\bridge</a>
+                $(`#${ownId}_text`).after(`<div style="position:absolute; top:35%; color:${$('#'+ownId+'_next').css('color')}; width:100%; left:-3px; text-align:center; font-size:medium;">
+					Tour sponsored by <a href="https://www.databridge.ch" target="_blank" style="color:${$('#'+ownId+'_next').css('color')};">data/\\bridge</a>
 					</div>`);
                 function delay(time) {
                     return new Promise(resolve => setTimeout(resolve, time));
@@ -61,7 +62,7 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
             } else {
                 quitTour('fast');
             }
-
+	
 
 
 
