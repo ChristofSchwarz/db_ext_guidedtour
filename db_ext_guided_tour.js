@@ -82,9 +82,15 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
                 // for better readability of code get the hypercube page into variables
                 var qObjId = currElem[0].qText;
                 var html = currElem[1].qText;
-				var width = currElem[2] ? (currElem[2].qNum == NaN || currElem[2].qText == undefined ? currElem[2].qNum : layout.pDefaultWidth) : layout.pDefaultWidth;
-                var bgColor = currElem[3] ? (currElem[3].qText == undefined ? layout.pBgColor : currElem[3].qText): layout.pBgColor;
-				var fontColor = currElem[4] ? (currElem[4].qText == undefined ? layout.pFontColor : currElem[4].qText) : layout.pFontColor;
+				var width = currElem[layout.pWidthFromDim] ? 
+					(currElem[layout.pWidthFromDim].qNum == NaN || currElem[layout.pWidthFromDim].qText == undefined ? layout.pDefaultWidth : currElem[layout.pWidthFromDim].qNum) 
+					: layout.pDefaultWidth;
+				var bgColor = currElem[layout.pBgColorFromDim] ? 
+					(currElem[layout.pBgColorFromDim].qText == undefined ? layout.pBgColor : currElem[layout.pBgColorFromDim].qText)
+					: layout.pBgColor;
+				var fontColor = currElem[layout.pFontColorFromDim] ? 
+					(currElem[layout.pFontColorFromDim].qText == undefined ? layout.pFontColor : currElem[layout.pFontColorFromDim].qText) 
+					: layout.pFontColor;
                 var orientation = 'r';
                 var dims;
                 const unknownObjId = $(`[tid="${qObjId}"]`).length == 0;
@@ -250,14 +256,16 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
             if (!Object(tours).hasOwnProperty(ownId)) tours[ownId] = -1;
 
             $element.html(`
-				
-				<div id="${ownId}_parent" style="height:100%;display:flex;justify-content:center;align-items:center;">
+				<div id="${ownId}_parent" style="height:100%;display:flex;justify-content:center;align-items:center;${layout.pExtensionFontColor.length > 0 ? ('color:' + layout.pExtensionFontColor) : ''}">
 					<div id="${ownId}_start" style="${styles.startTour}">
-						<span class="lui-icon  lui-icon--large  lui-icon--play" style="cursor:pointer;" id="${ownId}_play"></span> 
+						<span class="lui-icon  lui-icon--large  lui-icon--play" style="cursor:pointer;${!layout.pShowIcon ? 'display:none;' : ''}" id="${ownId}_play"></span> 
 						${layout.pTextStart}
 					</div>
 				</div>
 			`);
+			if (layout.pExtensionBgColor.length > 0) {
+				$(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor);
+			}
 
             $(`#${ownId}_start`).click(function () {
                 console.log(ownId, 'Clicked Tour Start');

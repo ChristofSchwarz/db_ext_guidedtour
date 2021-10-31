@@ -51,41 +51,47 @@ define([], function () {
                     url: '../extensions/db_ext_guided_tour/correctsortorder.html',
 					show: function (arg) { return checkSortOrder(arg); }
                 }, {
-                    label: "The first 2 dimensions are mandatory: object-id and text",
+                    label: "The first two dimensions are mandatory: object-id and text",
                     component: "text"
-                }, {
-                    label: 'Tour id field',
-                    type: 'string',
-                    ref: 'pTourField',
-                    defaultValue: 'tourid',
-                    expression: 'optional'
-                }, {
-                    label: 'Tour select value',
-                    type: 'string',
-                    ref: 'pTourSelectVal',
-                    defaultValue: '1',
-                    expression: 'optional'
-                }, subSection('Button Texts', [
+                }, subSection('Select A Specific Tour', [
 					{
+						label: "If you have multiple tours in your data model, you may want to filter the right one by making below selection",
+						component: "text"
+                	}, {
+						label: 'Select in field',
+						type: 'string',
+						ref: 'pTourField',
+						expression: 'optional'
+					}, {
+						label: 'Select this value',
+						type: 'string',
+						ref: 'pTourSelectVal',
+						expression: 'optional'
+					}
+				]), subSection('Button Colors & Texts', [
+					{
+						label: 'Background-color of button',
+						type: 'string',
+						ref: 'pExtensionBgColor',
+						expression: 'optional'
+					}, {
+						label: 'Font-color of button',
+						type: 'string',
+						ref: 'pExtensionFontColor',
+						expression: 'optional'
+					}, {
+						type: "boolean",
+						defaultValue: true,
+						ref: "pShowIcon",
+						label: "Show play icon"
+					}, {
 						label: 'Text for Tour Start',
 						type: 'string',
 						ref: 'pTextStart',
 						defaultValue: 'Start Tour',
 						expression: 'optional'
-					}, {
-						label: 'Text for Next button',
-						type: 'string',
-						ref: 'pTextNext',
-						defaultValue: 'Next',
-						expression: 'optional'
-					}, {
-						label: 'Text for Done button',
-						type: 'string',
-						ref: 'pTextDone',
-						defaultValue: 'Done',
-						expression: 'optional'
 					}
-				]), subSection('Coloring', [
+				]), subSection('Tooltip Colors & Text', [
 					{
 						label: 'Default tooltip backgr-color',
 						type: 'string',
@@ -110,6 +116,18 @@ define([], function () {
 						ref: "pFontColorFromDim",
 						defaultValue: "",
 						options: function(arg) { return getDimNames(arg); }
+					}, {
+						label: 'Text for Next button',
+						type: 'string',
+						ref: 'pTextNext',
+						defaultValue: 'Next',
+						expression: 'optional'
+					}, {
+						label: 'Text for Done button',
+						type: 'string',
+						ref: 'pTextDone',
+						defaultValue: 'Done',
+						expression: 'optional'
 					}
 				]), subSection('Advanced Settings', [
 					{
