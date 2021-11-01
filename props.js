@@ -154,13 +154,13 @@ define([], function () {
                         ref: 'pOffsetLeft',
                         defaultValue: 15,
                         expression: 'optional'
-                    }, {
+                    } /*, {
                         label: 'Selector for parent container',
                         type: 'string',
                         ref: 'pParentContainer',
                         defaultValue: '#qv-page-container',
                         expression: 'optional'
-                    }
+                    }*/
                 ])
             ]
         },
