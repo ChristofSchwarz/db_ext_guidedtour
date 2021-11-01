@@ -30,6 +30,9 @@ The extension also allows to configure the texts for "Start Tour", "Next" and "D
 In the Qlik Sense client add `/options/developer` to your url and go to Edit Mode on a sheet. When you right-click on any object, you can see then "Developer" in the
 context menu, and when you open, you will see the object id.
 
+In addition, you can use also any css selector (#id, .class, tag-selectors) to point to any element. You may want to use the browser's development tools (F12) for that 
+and need to have some experience with css selectors.
+
 ## Select a specific tour if you have multiple
 
 You can use the Guided-Tour-Extension multiple times in your app. You would still use only one data-table in the datamodel, but you should then introduce a "tour 
