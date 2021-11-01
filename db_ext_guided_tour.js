@@ -1,8 +1,8 @@
 define(["qlik", "jquery", "./props"], function (qlik, $, props) {
 
     'use strict';
-    const rootContainer = '#qs-page-container';
-    var tours = {};  // global variable to remember all active tours 
+    
+	var tours = {};  // global variable to remember all active tours 
     // it contains later one entry per extension and the number it shows is the active tooltip (0..n) or -1 if no tooltip is open
     var tooltipsCache = {};
 
@@ -11,30 +11,32 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
         err: 'background-color:red; color:white; text-align:center; padding:2px; margin-top:3px;',
 		startTour: 'cursor:pointer; text-align:center; font-size:large;',
         nextButton: 'float:right; height:auto; margin-top:10px;',
-        arrowLeft: function (col, height) {
+        arrowLeft: function (col, height, offset) {
             return `<div 
-			style="border-color: rgba(0,0,0,0) ${col} rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; border-width:20px; position:absolute; left:-40px; top:${height / 2 - 10}px">
+			style="border-color: rgba(0,0,0,0) ${col} rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; border-width:20px; position:absolute; left:-40px; top:${height / 2 - 10 + offset}px">
 			</div>`;
         },
-        arrowRight: function (col, height) {
+        arrowRight: function (col, height, offset) {
             return `<div 
-			style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0) ${col}; border-style:solid; border-width:20px; position:absolute; right:-40px; top:${height / 2 - 10}px">
+			style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0) ${col}; border-style:solid; border-width:20px; position:absolute; right:-40px; top:${height / 2 - 10 + offset}px">
 			</div>`;
         },
-        arrowBottom: function (col, width) {
+        arrowBottom: function (col, width, offset) {
             return `<div 
-			style="border-color: ${col} rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; border-width:20px; position:absolute; left:${width / 2 - 10}px; bottom:-40px;">
+			style="border-color: ${col} rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; border-width:20px; position:absolute; left:${width / 2 - 10 + offset}px; bottom:-40px;">
 			</div>`;
         },
-        arrowTop: function (col, width) {
+        arrowTop: function (col, width, offset) {
             return `<div 
-			style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) ${col} rgba(0,0,0,0); border-style:solid; border-width:20px; position:absolute; left:${width / 2 - 10}px; top:-40px;">
+			style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) ${col} rgba(0,0,0,0); border-style:solid; border-width:20px; position:absolute; left:${width / 2 - 10 + offset}px; top:-40px;">
 			</div>`;
         }
     }
 
     function play(ownId, layout, tourElements, tooltipNo, reset, enigma) {
 
+		const rootContainer = layout.pParentContainer || '#qv-page-container';
+		
         const isLast = tooltipNo >= (tourElements.length - 1);
         console.log(`${ownId} Play tour, tooltip ${tooltipNo} (isLast ${isLast})`);
 
@@ -75,7 +77,10 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
 
             if (prevElem) {
                 // fadeout the previous element (if it is not identical to the current)
-                if (prevElem[0].qText != currElem[0].qText) $(`[tid="${prevElem[0].qText}"]`).fadeTo('fast', 0.1, () => { })
+                if (prevElem[0].qText != currElem[0].qText) {
+					$(`[tid="${prevElem[0].qText}"]`).fadeTo('fast', 0.1, () => { }); // try with [tid="..."] selector
+					$(`${prevElem[0].qText}`).fadeTo('fast', 0.1, () => { }); // try with css selector
+				}
                 $(`#${ownId}_tooltip`).remove();
             }
             if (currElem) {
@@ -93,8 +98,11 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
 					: layout.pFontColor;
                 var orientation = 'r';
                 var dims;
-                const unknownObjId = $(`[tid="${qObjId}"]`).length == 0;
-                if (unknownObjId) {
+				console.log('lengths', $(`[tid="${qObjId}"]`).length, $(`${qObjId}`).length);
+                const knownObjId = $(`[tid="${qObjId}"]`).length + $(`${qObjId}`).length;
+				var selector = $(`[tid="${qObjId}"]`).length != 1 ? `${qObjId}` : `[tid="${qObjId}"]`;
+                
+				if (knownObjId == 0) {
                     // target object does not exist, place object in the moddle
                     $('.cell').fadeTo('fast', 0.1, () => { });
                     dims = {
@@ -103,14 +111,15 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
                     }
 
                 } else {
+					
                     // target object exists
-                    $(`[tid="${qObjId}"]`).fadeTo('fast', 1, () => { });
-                    $('.cell').not(`[tid="${qObjId}"]`).fadeTo('fast', 0.1, () => { });
-                    dims = $(`[tid="${qObjId}"]`).offset(); // this already sets left and top 
+                    $(selector).fadeTo('fast', 1, () => { });
+                    $('.cell').not(selector).fadeTo('fast', 0.1, () => { });
+                    dims = $(selector).offset(); // this already sets left and top 
                     dims.top -= $(rootContainer).position().top;
                     dims.left -= $(rootContainer).position().left;
-                    dims.height = $(`[tid="${qObjId}"]`).height();
-                    dims.width = $(`[tid="${qObjId}"]`).width();
+                    dims.height = $(selector).height();
+                    dims.width = $(selector).width();
 
                 }
 
@@ -119,7 +128,8 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
 				<div class="lui-tooltip" id="${ownId}_tooltip" style="display:none;width:${width}px;position:absolute;background-color:${bgColor};color:${fontColor};">
 				  <span style="opacity:0.6;">${tooltipNo + 1}/${tourElements.length}</span>
 				  <span class="lui-icon  lui-icon--close" style="float:right;cursor:pointer;" id="${ownId}_quit"></span>
-				  ${unknownObjId ? '<br/><div style="' + styles.err + '">Object id <strong>' + qObjId + '</strong> not found!</div>' : '<br/>'}
+				  ${knownObjId == 0 ? '<br/><div style="' + styles.err + '">Object <strong>' + qObjId + '</strong> not found!</div>' : '<br/>'}
+				  ${knownObjId > 1 ? '<br/><div style="' + styles.err + '"><strong>' + qObjId + '</strong> selects ' + knownObjId + ' objects!</div>' : '<br/>'}
 				  <div style="margin-top:10px" id="${ownId}_text">
 				  ${html}
 				  </div>
@@ -133,7 +143,7 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
 
                 dims.reqHeight = $(`#${ownId}_tooltip`).height(); // now that it's rendered, the browser knows the height of the tooltip
                 dims.reqWidth = $(`#${ownId}_tooltip`).width();
-                if (unknownObjId) {
+                if (knownObjId == 0) {
                     // adjust the positioning of tooltip to the center of parent div
                     $(`#${ownId}_tooltip`)
                         .css('left', dims.left - dims.reqWidth / 2)
@@ -152,37 +162,42 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
                     // if it is top or bottom orientation, decide depending on where there is more space left (above or below)
                     if (orientation == 'tb?') orientation = dims.freeSpaceT > dims.freeSpaceB ? (dims.freeSpaceT > dims.reqHeight ? 't' : 't!') : (dims.freeSpaceB > dims.reqHeight ? 'b' : 'b!');
 
-                    // console.log('orientation', orientation, dims);
+                    console.log('orientation', orientation, dims);
 
                     // move to right position and append the arrowhead
 
                     if (orientation == 'l') {
                         $(`#${ownId}_tooltip`)
                             .css('left', dims.left - dims.reqWidth - layout.pOffsetLeft)
-                            .css('top', dims.top + dims.height / 2 - dims.reqHeight / 2);
-                        $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowRight(bgColor, dims.reqHeight));
+                            .css('top', Math.max(dims.top + dims.height / 2 - dims.reqHeight / 2, 0));
+						
+						const offsetTop = Math.min(dims.top + dims.height / 2 - dims.reqHeight / 2, 0);
+                        $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowRight(bgColor, dims.reqHeight, offsetTop));
                     }
                     if (orientation == 'r') {
                         $(`#${ownId}_tooltip`)
                             .css('left', dims.left + dims.width)
-                            .css('top', dims.top + dims.height / 2 - dims.reqHeight / 2);
-                        $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowLeft(bgColor, dims.reqHeight));
+                            .css('top', Math.max(dims.top + dims.height / 2 - dims.reqHeight / 2, 0));
+						const offsetTop = Math.min(dims.top + dims.height / 2 - dims.reqHeight / 2, 0);
+                        $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowLeft(bgColor, dims.reqHeight, offsetTop));
                     }
 
                     if (orientation == 't' || orientation == 't!') {
                         $(`#${ownId}_tooltip`)
-                            .css('left', dims.left + dims.width / 2 - dims.reqWidth / 2)
+                            .css('left', Math.max(dims.left + dims.width / 2 - dims.reqWidth / 2, 0))
                             .css('top', orientation == 't!' ? 0 : (dims.top - dims.reqHeight - layout.pOffsetTop));
-                        $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowBottom(bgColor, dims.reqWidth));
+						const offsetLeft = Math.min(dims.left + dims.width / 2 - dims.reqWidth / 2, 0);
+                        $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowBottom(bgColor, dims.reqWidth, offsetLeft));
                     }
 
                     if (orientation == 'b' || orientation == 'b!') {
-                        $(`#${ownId}_tooltip`).css('left', dims.left + dims.width / 2 - dims.reqWidth / 2);
+                        $(`#${ownId}_tooltip`).css('left', Math.max(dims.left + dims.width / 2 - dims.reqWidth / 2, 0));
+						const offsetLeft = Math.min(dims.left + dims.width / 2 - dims.reqWidth / 2, 0);
                         if (orientation == 'b!')
                             $(`#${ownId}_tooltip`).css('bottom', dims.reqHeight)
                         else
                             $(`#${ownId}_tooltip`).css('top', dims.top + dims.height);
-                        $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowTop(bgColor, dims.reqWidth));
+                        $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowTop(bgColor, dims.reqWidth, offsetLeft));
                     }
                 }
                 $(`#${ownId}_tooltip`).show();
@@ -263,10 +278,8 @@ define(["qlik", "jquery", "./props"], function (qlik, $, props) {
 					</div>
 				</div>
 			`);
-			if (layout.pExtensionBgColor.length > 0) {
-				$(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor);
-			}
-
+			$(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor);
+			
             $(`#${ownId}_start`).click(function () {
                 console.log(ownId, 'Clicked Tour Start');
                 enigma.evaluate(`Sum({1} $Field='${layout.pTourField}') & Chr(10) & 
