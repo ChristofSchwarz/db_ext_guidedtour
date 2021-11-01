@@ -3,7 +3,7 @@
     "type": "visualization",
     "description": "Links to navigate to a sheet",
     "icon": "play",
-    "version": "0.9.0",
+    "version": "0.9.1,
     "author": "Christof Schwarz",
     "homepage": "www.databridge.ch",
     "keywords": "qlik-sense, visualization",
