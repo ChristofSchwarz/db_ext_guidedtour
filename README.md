@@ -7,30 +7,45 @@ This extension allows to make a sequence of colored tooltips (text bubbles) whic
 
 
 ## How to set up
-To render, it requires a data table loaded by data manager or load script with at least 2 colums. Supported are up to 5 columns. Add those in the exact 
-below sequence to the extension object under "Dimensions" (you can skip 3, 4, and 5):
+To render, it requires a data table loaded by data manager or load script with at least 2 colums: 
 
 1. Qlik objectId
 2. Text for tooltip (can contain html tags, good for formatting or hyperlinks)
-3. Width in pixels (250 is the default; the height will be dynamically determined)
-4. Background-color (in css format e.g.: `#0a0b1c`, `rgb(45,45,45)`, `rgba(0,0,0,0.25)`, `darkred` ...)
-5. Text-color (in css format)
 
-The extenion has general settings for the parameters 3, 4 and 5, in case you would like all tooltips to show in **same width** and **same colors**. In that case, you need 
-only 2 dimensions. But if you want to style tooltips individually for different objects, you need those colums 3, 4, and 5
+Supported are up to 5 columns. So you can add columns with background-color, text-color, and/or tooltip width. You will find dropdowns in the properties of 
+the extension to choose which dimension (3rd, 4th, 5th) will deliver which attribute. If the data table doesn't have a value (length zero or null) then the 
+default setting for bg-color, text-color, and width kicks in.
 
-The extension allows to configure the texts for "Start Tour", "Next" and "Done" links.
+Optionally, add those columns to the data model if you want any combination of the below params to change per tooltip. If you want all the same, just use the 
+default settings in the Extension properties.
 
-**Hint**: You can omit a column but not change the position, for example if you don't care about the width but want to set a background-color, provide 4 columns: 
-objectId, tooltipText, `=Null()`, tooltipBgColor  ... the formula =Null() creates the column in the right order, but doesn't provide a value
+ * Background-color (in css format e.g.: `#0a0b1c`, `rgb(45,45,45)`, `rgba(0,0,0,0.25)`, `darkred` ...)
+ * Text-color (in css format)
+ * Width in pixels (250 is the default; the height will be dynamically determined)
 
-**Note**: This extension has no expression (measure) to add. However, if you wonder how you can use mulitple Guided Tour objects within your application for 
-mulitpile tours, load the data together with an identifier for each tour. The tour extension will, when the user clicks Start, select a configurable value (say "Tour1") in 
-a configurable field (say "Tour_Id"). That way, correct tour will start. 
+The extension also allows to configure the texts for "Start Tour", "Next" and "Done" links.
+
+## How to find out the object id
+
+In the Qlik Sense client add `/options/developer` to your url and go to Edit Mode on a sheet. When you right-click on any object, you can see then "Developer" in the
+context menu, and when you open, you will see the object id.
+
+## Select a specific tour if you have multiple
+
+You can use the Guided-Tour-Extension multiple times in your app. You would still use only one data-table in the datamodel, but you should then introduce a "tour 
+identifier" field to group those tooltips that belong together.
+
+This extension has no expression (measure) to add, so you don't need to handle with set-analysis or so. The tour extension will, when the user clicks Start, 
+**select** a configurable value (say "Tour1") in a configurable field (say "Tour_Id"). That way, correct tour will start. 
+
+Configure the field-name and the select-value in the Extension properties.
 
 ## Support of Multi-language
 
 Like any other object, the dimension could be dynamically be calculated. That allows for example the text of the tooltip in different languages, based on a formula with a 
 variable. E.g. the 2nd dimension is `=tooltip.$(vLanguage)` and the variable `vLanguage` has values like "en" or "fr", it picks a different fields `tooltip.en` or `tooltip.fr`
 
+## Known limitations
+
+In small-device mode of the Sense Client, the tooltips do not render nicely.
 
