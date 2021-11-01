@@ -5,7 +5,7 @@
   "icon": "play",
   "version": "0.9.1",
   "changehistory": [
-    ["0.9.0", "30-Oct-2021", "initial version"
+    ["0.9.0", "30-Oct-2021", "initial version"],
     ["0.9.1", "01-Nov-2021", "allow also css selectors for placing the tooltip"]
   ],
   "author": "Christof Schwarz",
