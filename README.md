@@ -51,4 +51,3 @@ variable. E.g. the 2nd dimension is `=tooltip.$(vLanguage)` and the variable `vL
 ## Known limitations
 
  * In small-device mode of the Sense Client, the tooltips do not render nicely.
- * When extending the sheet and a scrollbar is shown, scrolling to the object of focus is not yet supported
