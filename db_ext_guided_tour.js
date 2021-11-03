@@ -7,8 +7,17 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
     var tooltipsCache = {};
 
     const styles = {
-		startTour: 'cursor:pointer; text-align:center; font-size:large;',
+        startTour: 'cursor:pointer; text-align:center; font-size:large;',
     }
+	
+	var qext;
+	
+	$.ajax({
+	  url: '../extensions/db_ext_guided_tour/db_ext_guided_tour.qext',
+	  dataType: 'json',
+	  async: false,  // wait for this call to finish.
+	  success: function(data) { qext = data; }
+	});
 
     return {
         initialProperties: {
@@ -38,7 +47,7 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
                 }, {
                     label: 'About this extension',
                     type: 'items',
-                    items: props.about($)
+                    items: props.about($, qext)
                 }
             ]
         },
