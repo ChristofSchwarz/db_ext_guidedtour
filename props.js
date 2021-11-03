@@ -165,10 +165,10 @@ define([], function () {
             ]
         },
 
-        about: function ($) {
+        about: function ($, qext) {
             return [
                 {
-                    label: 'Extension version',
+                    label: function(arg) { return 'Installed extension version ' + qext.version },
                     component: "link",
                     url: '../extensions/db_ext_guided_tour/db_ext_guided_tour.qext'
                 }, {
