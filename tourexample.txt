@@ -1,0 +1,5 @@
+tourid, objid, html, bgcolor, width, fontcolor
+q, .qs-sheet-toolbar-next-sheet-button, Use this button to go the next sheet
+q, .qv-pager li:first-of-type, Keep an eye on the Current Selections that you selected. They will show here.
+q, #clearselections, This button clears all current selections at once. 
+q, .qv-subtoolbar-button .lui-icon--selection-search, Use this button to search for any text in the data ...
