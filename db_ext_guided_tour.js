@@ -1,23 +1,23 @@
 define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, functions) {
 
     'use strict';
-    
-	var tours = {};  // global variable to remember all active tours 
-        // it contains later one entry per extension and the number it shows is the active tooltip (0..n) or -1 if no tooltip is open
+
+    var tours = {};  // global variable to remember all active tours 
+    // it contains later one entry per extension and the number it shows is the active tooltip (0..n) or -1 if no tooltip is open
     var tooltipsCache = {};
 
     const styles = {
         startTour: 'cursor:pointer; text-align:center; font-size:large;',
     }
-	
-	var qext;
-	
-	$.ajax({
-	  url: '../extensions/db_ext_guided_tour/db_ext_guided_tour.qext',
-	  dataType: 'json',
-	  async: false,  // wait for this call to finish.
-	  success: function(data) { qext = data; }
-	});
+
+    var qext;
+
+    $.ajax({
+        url: '../extensions/db_ext_guided_tour/db_ext_guided_tour.qext',
+        dataType: 'json',
+        async: false,  // wait for this call to finish.
+        success: function (data) { qext = data; }
+    });
 
     return {
         initialProperties: {
@@ -54,7 +54,7 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
         snapshot: {
             canTakeSnapshot: false
         },
-		
+
         resize: function ($element, layout) {
 
             const ownId = this.options.id;
@@ -66,7 +66,7 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
                 // console.log('resize', tours);
                 functions.play(ownId, layout, tooltipsCache[ownId], tours[ownId], false, enigma, tours, tooltipsCache)
             }
-			return qlik.Promise.resolve();
+            return qlik.Promise.resolve();
         },
 
         paint: async function ($element, layout) {
@@ -87,8 +87,8 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
 					</div>
 				</div>
 			`);
-			$(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor);
-			
+            $(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor);
+
             $(`#${ownId}_start`).click(function () {
                 console.log(ownId, 'Clicked Tour Start');
                 enigma.evaluate(`Sum({1} $Field='${layout.pTourField}') & Chr(10) & 
