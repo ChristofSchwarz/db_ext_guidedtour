@@ -161,7 +161,19 @@ define([], function () {
                         defaultValue: '#qv-page-container',
                         expression: 'optional'
                     }*/
-                ])
+                ]), subSection('License', [
+					{
+                        label: 'License No.',
+                        type: 'string',
+                        ref: 'pLicense',
+                        expression: 'optional'
+                    }, {
+                        label: 'Check Sum',
+                        type: 'number',
+                        ref: 'pCheckSum',
+                        expression: 'optional'
+                    }
+				])
             ]
         },
 
