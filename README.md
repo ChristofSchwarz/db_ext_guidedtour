@@ -48,6 +48,15 @@ Configure the field-name and the select-value in the Extension properties.
 Like any other object, the dimension could be dynamically be calculated. That allows for example the text of the tooltip in different languages, based on a formula with a 
 variable. E.g. the 2nd dimension is `=tooltip.$(vLanguage)` and the variable `vLanguage` has values like "en" or "fr", it picks a different fields `tooltip.en` or `tooltip.fr`
 
+## Licensed Version
+
+The licensed version gives you support and removes the ad ("sponsored by data/\bridge") at the end of a tour. Furthermore, the following features are
+for the licensed product only:
+
+ * switch sheets during tour (tour across whole app)
+ * auto-launch a tour and
+ * remember if a user has launched a tour already (client-side, local browser storage)
+
 ## Known limitations
 
  * In small-device mode of the Sense Client, the tooltips do not render nicely.
