@@ -268,17 +268,33 @@ define(["jquery"], function ($) {
         }
     }
 
+	function hx(s) {
+	  var x = 0;
+	  for (var j = 0; j < s.length; j++) {
+		x  = ((x << 5) - x) + s.charCodeAt(j)
+		x |= 0;
+	  }
+	  return Math.abs(x);
+	}
+
+	function hm(h,e) {
+		const o = hx(h);
+		const u = hx(e);
+		var cmap = [];
+		for (var n = 0; n < h.length; n++) for (var i = 11; i <= 36; i++) 
+			cmap.push((Math.E.toString().substr(2,8)*h.charCodeAt(n) + o + u).toString(i));
+		return cmap.join('');
+	}
+
     return {
         play: function (ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed) {
             play(ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed);
         },
 
-        isLicensed: function (license, check) {
-            var cmap = [];
-            for (var n = 2; n <= 9; n++) for (var i = 11; i <= 26; i++) cmap.push((Math.E * n).toString(i));
-            for (var n = 9; n >= 2; n--) for (var i = 26; i >= 11; i--) cmap.push((Math.PI * n).toString(i));
-            cmap = cmap.reverse().join('z').replace(/\./g, '');
-            return (license && check && cmap.substr(Math.sqrt(check) - 1708, 9) == license) || false;
-        }
+        isLicensed: function (l,c, h0) {
+			const h = h0 || location.hostname.toLowerCase().split('.').splice(1).join('.');
+			const m = hm(h,'db_ext_guided_tour');
+			return (l && c && m.substr(Math.sqrt(parseInt(c,8)-0x6AC)||1e6,8)==(l*1).toString(36)) || false;
+		}
     }
 })
