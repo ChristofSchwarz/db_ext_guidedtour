@@ -112,8 +112,8 @@ define(["jquery", "./functions"], function ($, functions) {
                         $('.guided-tour-picker').remove(); // remove previous divs
                         $('.cell').not(`[tid="${arg.qInfo.qId}"]`).find('.qv-inner-object')  // add divs overlaying every Sense object
                             .prepend(`<div style="position:absolute; z-index:100; background-color:${bgColorPickers}; 
-						   cursor:pointer; color:white; border-radius: 10px; padding: 0 10px;" 
-						   class="guided-tour-picker">PICK</div>`);
+                            cursor:pointer; color:white; border-radius: 10px; padding: 0 10px;" 
+                            class="guided-tour-picker">PICK</div>`);
 
                         $('.guided-tour-picker').click((me) => {
                             var parent = me.currentTarget;
@@ -152,8 +152,8 @@ define(["jquery", "./functions"], function ($, functions) {
 
                         $(`[tid="${ownId}"] .qv-inner-object`)  // the current extension object gets different onclick event
                             .prepend(`<div style="position:absolute; z-index:100; background-color:${bgColorPickers}; 
-						   cursor:pointer; color:white; border-radius: 10px; padding: 0 10px;" 
-						   class="guided-tour-picker">DONE <span class="guided-tour-picks"></span></div>`);
+                            cursor:pointer; color:white; border-radius: 10px; padding: 0 10px;" 
+                            class="guided-tour-picker">DONE <span class="guided-tour-picks"></span></div>`);
 
                         $(`[tid="${ownId}"] .guided-tour-picker`).click((me) => {
                             console.log('Those are the objectIds you picked:');
