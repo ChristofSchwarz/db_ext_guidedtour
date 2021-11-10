@@ -8,16 +8,16 @@ define(["jquery", "./functions"], function ($, functions) {
     const bgColorPickers = '#079B4A';
 
     function subSection(labelText, itemsArray) {
-        const ret = {
+        var ret = {
             component: 'expandable-items',
-            items: [
-                {
-                    label: labelText,
-                    type: 'items',
-                    items: itemsArray
-                }
-            ]
+            items: {}
         };
+		const labelHash = btoa(labelText).split('=')[0];
+		ret.items[labelHash] = {
+			label: labelText,
+			type: 'items',
+			items: itemsArray
+		};
         return ret;
     }
 
@@ -44,51 +44,6 @@ define(["jquery", "./functions"], function ($, functions) {
         //console.log('qSortCriterias', arg.qHyperCubeDef.qInterColumnSortOrder[0], sortByLoadOrder, interSort);
         return !sortByLoadOrder || !interSort;
     }
-
-    //=============================================================================================
-    function leonardoMsg(ownId, title, detail, ok, cancel, inverse) {
-        //=========================================================================================
-        // This html was found on https://qlik-oss.github.io/leonardo-ui/dialog.html
-        if ($('#msgparent_' + ownId).length > 0) $('#msgparent_' + ownId).remove();
-
-        var html = '<div id="msgparent_' + ownId + '">' +
-            '  <div class="lui-modal-background"></div>' +
-            '  <div class="lui-dialog' + (inverse ? '  lui-dialog--inverse' : '') + '" style="width: 400px;top:80px;">' +
-            '    <div class="lui-dialog__header">' +
-            '      <div class="lui-dialog__title">' + title + '</div>' +
-            '    </div>' +
-            '    <div class="lui-dialog__body">' +
-            detail +
-            '    </div>' +
-            '    <div class="lui-dialog__footer">';
-        if (cancel) {
-            html +=
-                '  <button class="lui-button  lui-dialog__button' + (inverse ? '  lui-button--inverse' : '') + '" ' +
-                '   onclick="$(\'#msgparent_' + ownId + '\').remove();">' +
-                //'   onclick="var elem=document.getElementById(\'msgparent_' + ownId + '\');elem.parentNode.removeChild(elem);">' +
-                cancel +
-                ' </button>'
-        }
-        if (ok) {
-            html +=
-                '  <button class="lui-button  lui-dialog__button  ' + (inverse ? '  lui-button--inverse' : '') + '" id="msgok_' + ownId + '">' +
-                ok +
-                ' </button>'
-        };
-        html +=
-            '     </div>' +
-            '  </div>' +
-            '</div>';
-
-        $("#qs-page-container").append(html);
-        // fix for Qlik Sense > July 2021, the dialog gets rendered below the visible part of the screen
-        if ($('#msgparent_' + ownId + ' .lui-dialog').position().top > 81) {
-            $('#msgparent_' + ownId + ' .lui-dialog').css({
-                'top': (-$('#msgparent_' + ownId + ' .lui-dialog').position().top + 100) + 'px'
-            });
-        }
-    }
-
 
     return {
         presentation: function (app) {
@@ -160,7 +115,7 @@ define(["jquery", "./functions"], function ($, functions) {
                         $(`[tid="${ownId}"] .guided-tour-picker`).click((me) => {
                             console.log('Those are the objectIds you picked:');
                             console.log(pickList.join('\n'));
-                            leonardoMsg(ownId, 'Picked Objects',
+                            functions.leonardoMsg(ownId, 'Picked Objects',
                                 `<label class="lui-radiobutton">
                                     <input class="lui-radiobutton__input" type="radio" name="${ownId}_cb" checked id="${ownId}_opt1">
                                     <div class="lui-radiobutton__radio-wrap">
@@ -185,102 +140,117 @@ define(["jquery", "./functions"], function ($, functions) {
                         })
 
                     }
-                }, subSection('Select A Specific Tour', [
-                    {
+                }, subSection('Select A Specific Tour', {
+                    e:{
                         label: "If you have multiple tours in your data model, you may want to filter the right one by making below selection",
                         component: "text"
-                    }, {
+                    }, f:{
                         label: 'Select in field',
                         type: 'string',
                         ref: 'pTourField',
                         expression: 'optional'
-                    }, {
+                    }, g:{
                         label: 'Select this value',
                         type: 'string',
                         ref: 'pTourSelectVal',
                         expression: 'optional'
                     }
-                ]), subSection('Button Text & Color', [
-                    {
+                }), subSection('Button Text & Color', {
+                    a:{
                         label: 'Text for Tour Start',
                         type: 'string',
                         ref: 'pTextStart',
                         defaultValue: 'Start Tour',
                         expression: 'optional'
-                    }, {
+                    }, b:{
                         type: "boolean",
                         defaultValue: true,
                         ref: "pShowIcon",
                         label: "Show play icon"
-                    }, {
+                    }, c:{
                         label: 'Background-color of button',
                         type: 'string',
                         ref: 'pExtensionBgColor',
                         expression: 'optional'
-                    }, {
+                    }, d:{
                         label: 'Font-color of button',
                         type: 'string',
                         ref: 'pExtensionFontColor',
                         expression: 'optional'
                     }
-                ]), subSection('Tooltips Texts & Colors', [
-                    {
+                }), subSection('Tooltips Texts & Colors', {
+                    h:{
                         label: 'Text for Next button',
                         type: 'string',
                         ref: 'pTextNext',
                         defaultValue: 'Next',
                         expression: 'optional'
-                    }, {
+                    }, i:{
                         label: 'Text for Done button',
                         type: 'string',
                         ref: 'pTextDone',
                         defaultValue: 'Done',
                         expression: 'optional'
-                    }, {
+                    }, j:{
                         label: 'Default tooltip backgr-color',
                         type: 'string',
                         ref: 'pBgColor',
                         defaultValue: 'rgba(0,0,0,0.9)',
                         expression: 'optional'
-                    }, {
+                    }, k:{
                         label: 'Dynamic backgr-color from dim',
                         component: "dropdown",
                         ref: "pBgColorFromDim",
                         defaultValue: "",
                         options: function (arg) { return getDimNames(arg); }
-                    }, {
+                    }, l:{
                         label: 'Default tooltip font color',
                         type: 'string',
                         ref: 'pFontColor',
                         defaultValue: '#e0e0e0',
                         expression: 'optional'
-                    }, {
+                    }, m:{
                         label: 'Dynamic font-color from dim',
                         component: "dropdown",
                         ref: "pFontColorFromDim",
                         defaultValue: "",
                         options: function (arg) { return getDimNames(arg); }
                     }
-                ]), subSection('Advanced Settings', [
-                    {
+                }), subSection('Advanced Settings', {
+                    n:{
+                        label: 'Font Size',
+                        type: 'string',
+                        ref: 'pFontSize',
+                        defaultValue: '11pt',
+                        expression: 'optional'
+                    }, o:{
                         label: 'Default tooltip width (px)',
                         type: 'number',
                         ref: 'pDefaultWidth',
                         defaultValue: 250,
                         expression: 'optional'
-                    }, {
+                    }, p:{
                         label: 'Dynamic tooltip width from dim',
                         component: "dropdown",
                         ref: "pWidthFromDim",
                         defaultValue: "",
                         options: function (arg) { return getDimNames(arg); }
-                    }, {
+                    }, q:{
+                        label: 'Opacity of inactive objects',
+                        type: 'number',
+                        ref: 'pOpacity',
+                        component: "slider",
+						defaultValue: 0.1,
+                        min: 0.1,
+						max: 1,
+						step: 0.1
+                    }, r:{
                         label: 'Offset when top (px)',
                         type: 'number',
                         ref: 'pOffsetTop',
                         defaultValue: 10,
                         expression: 'optional'
-                    }, {
+                    }, s:{
                         label: 'Offset when left (px)',
                         type: 'number',
                         ref: 'pOffsetLeft',
@@ -293,7 +263,7 @@ define(["jquery", "./functions"], function ($, functions) {
                         defaultValue: '#qv-page-container',
                         expression: 'optional'
                     }*/
-                ])
+                })
             ]
         },
 
@@ -322,7 +292,7 @@ define(["jquery", "./functions"], function ($, functions) {
                             label: "Check Sum"
                         }, {
                             label: function (arg) {
-                                const isLicensed = functions.isLicensed(arg.pLicNo, arg.pCheckSum, arg.label);
+                                const isLicensed = functions.isLicensed(arg.pLicNo, arg.pCheckSum, arg.label.length, arg.label);
                                 return isLicensed ? (String.fromCharCode(0x2713) + ' licensed') : (String.fromCharCode(0x274C) + 'not licensed')
                             },
                             component: 'text'
