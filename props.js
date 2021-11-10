@@ -1,3 +1,5 @@
+// props.js: Extension properties (accordeon menu) externalized
+
 define(["jquery", "./functions"], function ($, functions) {
 
     var pickList = [];
