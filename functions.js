@@ -1,4 +1,4 @@
-// function play externalized 
+// functions.js: function play externalized 
 
 define(["jquery"], function ($) {
 
@@ -9,23 +9,23 @@ define(["jquery"], function ($) {
         nextButton: 'float:right; height:auto; margin-top:10px;',
         arrowLeft: function (col, height, offset) {
             return `<div 
-			style="border-color: rgba(0,0,0,0) ${col} rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; border-width:${arrowHeadSize}px; position:absolute; left:-40px; top:${height / 2 - arrowHeadSize / 2 + offset}px">
-			</div>`;
+                style="border-color: rgba(0,0,0,0) ${col} rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; border-width:${arrowHeadSize}px; position:absolute; left:-40px; top:${height / 2 - arrowHeadSize / 2 + offset}px">
+            </div>`;
         },
         arrowRight: function (col, height, offset) {
             return `<div 
-			style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0) ${col}; border-style:solid; border-width:${arrowHeadSize}px; position:absolute; right:-40px; top:${height / 2 - arrowHeadSize / 2 + offset}px">
-			</div>`;
+                style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0) ${col}; border-style:solid; border-width:${arrowHeadSize}px; position:absolute; right:-40px; top:${height / 2 - arrowHeadSize / 2 + offset}px">
+            </div>`;
         },
         arrowBottom: function (col, width, offset) {
             return `<div 
-			style="border-color: ${col} rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; border-width:${arrowHeadSize}px; position:absolute; left:${width / 2 - arrowHeadSize / 2 + offset}px; bottom:-40px;">
-			</div>`;
+               style="border-color: ${col} rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; border-width:${arrowHeadSize}px; position:absolute; left:${width / 2 - arrowHeadSize / 2 + offset}px; bottom:-40px;">
+            </div>`;
         },
         arrowTop: function (col, width, offset) {
             return `<div 
-			style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) ${col} rgba(0,0,0,0); border-style:solid; border-width:${arrowHeadSize}px; position:absolute; left:${width / 2 - arrowHeadSize / 2 + offset}px; top:-40px;">
-			</div>`;
+                style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) ${col} rgba(0,0,0,0); border-style:solid; border-width:${arrowHeadSize}px; position:absolute; left:${width / 2 - arrowHeadSize / 2 + offset}px; top:-40px;">
+            </div>`;
         }
     }
 
@@ -44,8 +44,8 @@ define(["jquery"], function ($) {
     function play(ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed) {
 
         const rootContainer = '#qv-page-container'; /*layout.pParentContainer */
-		const finallyScrollTo = '#sheet-title';
-		
+        const finallyScrollTo = '#sheet-title';
+
         const isLast = tooltipNo >= (tooltipsCache[ownId].length - 1);
         console.log(`${ownId} Play tour, tooltip ${tooltipNo} (isLast ${isLast}, licensed ${licensed})`);
 
@@ -67,18 +67,18 @@ define(["jquery"], function ($) {
                     // after the last item of a tour, show databridge ad for a second
                     $(`#${ownId}_tooltip`).children().css('opacity', 0);
                     $(`#${ownId}_text`).after(`<div style="position:absolute; top:35%; color:${$('#' + ownId + '_next').css('color')}; width:100%; left:-3px; text-align:center; font-size:medium;">
-						Tour sponsored by <a href="https://www.databridge.ch" target="_blank" style="color:${$('#' + ownId + '_next').css('color')};">data/\\bridge</a>
-						</div>`);
+                        Tour sponsored by <a href="https://www.databridge.ch" target="_blank" style="color:${$('#' + ownId + '_next').css('color')};">data/\\bridge</a>
+                        </div>`);
                 }
                 function delay(time) {
                     return new Promise(resolve => setTimeout(resolve, time));
                 }
-				
-                try { 
-					if (!isScrolledIntoView(finallyScrollTo)) {
-						document.querySelector(finallyScrollTo).scrollIntoView({ behavior: "smooth" });  // scroll to the top
-					}
-				}
+
+                try {
+                    if (!isScrolledIntoView(finallyScrollTo)) {
+                        document.querySelector(finallyScrollTo).scrollIntoView({ behavior: "smooth" });  // scroll to the top
+                    }
+                }
                 catch (err) { }
                 delay(licensed ? 1 : 1000).then(() => quitTour('slow'));
 
@@ -166,17 +166,17 @@ define(["jquery"], function ($) {
 
                     // add the tooltip div
                     $(rootContainer).append(`
-				<div class="lui-tooltip" id="${ownId}_tooltip" style="display:none;width:${width}px;position:absolute;background-color:${bgColor};color:${fontColor};">
-				  <span style="opacity:0.6;">${tooltipNo + 1}/${tooltipsCache[ownId].length}</span>
-				  <span class="lui-icon  lui-icon--close" style="float:right;cursor:pointer;" id="${ownId}_quit"></span>
-				  ${knownObjId == 0 ? '<br/><div style="' + styles.err + '">Object <strong>' + qObjId + '</strong> not found!</div>' : '<br/>'}
-				  ${knownObjId > 1 ? '<br/><div style="' + styles.err + '"><strong>' + qObjId + '</strong> selects ' + knownObjId + ' objects!</div>' : '<br/>'}
-				  <div style="margin-top:10px" id="${ownId}_text">
-				  ${html}
-				  </div>
-				  <a class="lui-button" style="${styles.nextButton}color:${fontColor};" id="${ownId}_next">${isLast ? layout.pTextDone : layout.pTextNext}</a>
-				  <div class="lui-tooltip__arrow"></div>
-				</div>`);
+                    <div class="lui-tooltip" id="${ownId}_tooltip" style="display:none;width:${width}px;position:absolute;background-color:${bgColor};color:${fontColor};">
+                        <span style="opacity:0.6;">${tooltipNo + 1}/${tooltipsCache[ownId].length}</span>
+                        <span class="lui-icon  lui-icon--close" style="float:right;cursor:pointer;" id="${ownId}_quit"></span>
+                        ${knownObjId == 0 ? '<br/><div style="' + styles.err + '">Object <strong>' + qObjId + '</strong> not found!</div>' : '<br/>'}
+                        ${knownObjId > 1 ? '<br/><div style="' + styles.err + '"><strong>' + qObjId + '</strong> selects ' + knownObjId + ' objects!</div>' : '<br/>'}
+                        <div style="margin-top:10px" id="${ownId}_text">
+                        ${html}
+                        </div>
+                        <a class="lui-button" style="${styles.nextButton}color:${fontColor};" id="${ownId}_next">${isLast ? layout.pTextDone : layout.pTextNext}</a>
+                        <div class="lui-tooltip__arrow"></div>
+                    </div>`);
 
                     // register click trigger for "X" (quit) and Next/Done button
                     $(`#${ownId}_quit`).click(() => play(ownId, layout, tooltipNo, true, enigma, tours, tooltipsCache, licensed));
@@ -268,33 +268,33 @@ define(["jquery"], function ($) {
         }
     }
 
-	function hx(s) {
-	  var x = 0;
-	  for (var j = 0; j < s.length; j++) {
-		x  = ((x << 5) - x) + s.charCodeAt(j)
-		x |= 0;
-	  }
-	  return Math.abs(x);
-	}
+    function hx(s) {
+        var x = 0;
+        for (var j = 0; j < s.length; j++) {
+            x = ((x << 5) - x) + s.charCodeAt(j)
+            x |= 0;
+        }
+        return Math.abs(x);
+    }
 
-	function hm(h,e) {
-		const o = hx(h);
-		const u = hx(e);
-		var cmap = [];
-		for (var n = 0; n < h.length; n++) for (var i = 11; i <= 36; i++) 
-			cmap.push((Math.E.toString().substr(2,8)*h.charCodeAt(n) + o + u).toString(i));
-		return cmap.join('');
-	}
+    function hm(h, e) {
+        const o = hx(h);
+        const u = hx(e);
+        var cmap = [];
+        for (var n = 0; n < h.length; n++) for (var i = 11; i <= 36; i++)
+            cmap.push((Math.E.toString().substr(2, 8) * h.charCodeAt(n) + o + u).toString(i));
+        return cmap.join('');
+    }
 
     return {
         play: function (ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed) {
             play(ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed);
         },
 
-        isLicensed: function (l,c, h0) {
-			const h = h0 || location.hostname.toLowerCase().split('.').splice(1).join('.');
-			const m = hm(h,'db_ext_guided_tour');
-			return (l && c && m.substr(Math.sqrt(parseInt(c,8)-0x6AC)||1e6,8)==(l*1).toString(36)) || false;
-		}
+        isLicensed: function (l, c, h0) {
+            const h = h0 || location.hostname.toLowerCase().split('.').splice(1).join('.');
+            const m = hm(h, 'db_ext_guided_tour');
+            return (l && c && m.substr(Math.sqrt(parseInt(c, 8) - 0x6AC) || 1e6, 8) == (l * 1).toString(36)) || false;
+        }
     }
 })
