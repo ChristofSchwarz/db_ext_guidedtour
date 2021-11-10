@@ -160,21 +160,21 @@ define(["jquery", "./functions"], function ($, functions) {
                             console.log(pickList.join('\n'));
                             leonardoMsg(ownId, 'Picked Objects',
                                 `<label class="lui-radiobutton">
-								  <input class="lui-radiobutton__input" type="radio" name="${ownId}_cb" checked id="${ownId}_opt1">
-								  <div class="lui-radiobutton__radio-wrap">
-									<span class="lui-radiobutton__radio"></span>
-									<span class="lui-radiobutton__radio-text">Object IDs and type/title</span>
-								  </div>
-								</label>
-								<label class="lui-radiobutton">
-								  <input class="lui-radiobutton__input" type="radio" name="${ownId}_cb" id="${ownId}_opt2">
-								  <div class="lui-radiobutton__radio-wrap">
-									<span class="lui-radiobutton__radio"></span>
-									<span class="lui-radiobutton__radio-text">Just object IDs</span>
-								  </div>
-								</label>
-								<textarea class="lui-textarea" style="height:140px;font-size:11pt;margin:10px 0;" id="${ownId}_textarea">${pickList.join('\n')}</textarea>
-								<button class="lui-button" onclick="document.getElementById('${ownId}_textarea').select();document.execCommand('copy');">Copy to clipboard</button>`,
+                                    <input class="lui-radiobutton__input" type="radio" name="${ownId}_cb" checked id="${ownId}_opt1">
+                                    <div class="lui-radiobutton__radio-wrap">
+                                    <span class="lui-radiobutton__radio"></span>
+                                    <span class="lui-radiobutton__radio-text">Object IDs and type/title</span>
+                                    </div>
+                                </label>
+                                <label class="lui-radiobutton">
+                                    <input class="lui-radiobutton__input" type="radio" name="${ownId}_cb" id="${ownId}_opt2">
+                                    <div class="lui-radiobutton__radio-wrap">
+                                    <span class="lui-radiobutton__radio"></span>
+                                    <span class="lui-radiobutton__radio-text">Just object IDs</span>
+                                    </div>
+                                </label>
+                                <textarea class="lui-textarea" style="height:140px;font-size:11pt;margin:10px 0;" id="${ownId}_textarea">${pickList.join('\n')}</textarea>
+                                <button class="lui-button" onclick="document.getElementById('${ownId}_textarea').select();document.execCommand('copy');">Copy to clipboard</button>`,
                                 'Close', null, false);
                             $(`#${ownId}_opt1`).click(() => { $(`#${ownId}_textarea`).html(pickList.join('\n')); });
                             $(`#${ownId}_opt2`).click(() => { $(`#${ownId}_textarea`).html(pickList2.join('\n')); });
@@ -291,7 +291,7 @@ define(["jquery", "./functions"], function ($, functions) {
                         defaultValue: '#qv-page-container',
                         expression: 'optional'
                     }*/
-                ]) 
+                ])
             ]
         },
 
@@ -319,12 +319,12 @@ define(["jquery", "./functions"], function ($, functions) {
                             ref: "pCheckSum",
                             label: "Check Sum"
                         }, {
-							label: function (arg) {
-								const isLicensed = functions.isLicensed(arg.pLicNo, arg.pCheckSum, arg.label);
-								return isLicensed ? (String.fromCharCode(0x2713) + ' licensed') : (String.fromCharCode(0x274C) + 'not licensed')
-							},
-							component: 'text'
-						}
+                            label: function (arg) {
+                                const isLicensed = functions.isLicensed(arg.pLicNo, arg.pCheckSum, arg.label);
+                                return isLicensed ? (String.fromCharCode(0x2713) + ' licensed') : (String.fromCharCode(0x274C) + 'not licensed')
+                            },
+                            component: 'text'
+                        }
                     ]
                 }
             ]
