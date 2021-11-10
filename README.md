@@ -27,11 +27,12 @@ The extension also allows to configure the texts for "Start Tour", "Next" and "D
 
 ## How to find out the object id
 
-In the Qlik Sense client add `/options/developer` to your url and go to Edit Mode on a sheet. When you right-click on any object, you can see then "Developer" in the
-context menu, and when you open, you will see the object id.
+New as of 10-Nov-2021 is the button "Select Objects for tour" in the Extension Settings (accordeon menu on the right). When you click this, every object
+will get a "PICK" button and the Tour Extension gets a "DONE" button. Click on the PICK buttons in the sequence you want to write help text for them, finally
+click on DONE and copy/paste the IDs to your source table of the tooltip help.
 
-In addition, you can use also **any css selector** (#id, .class, tag-selectors) to point to any element. You may want to use the browser's development tools (F12) for that 
-and you should have some experience with css selectors.
+In addition to the Qlik Sense object ids, you can use also **any css selector** (#id, .class, tag-selectors) to point to any element in the DOM of the page. 
+You may want to use the browser's development tools (F12) for that and you should have experience with css selectors.
 
 ## Select a specific tour if you have multiple
 
@@ -56,6 +57,8 @@ for the licensed product only:
  * switch sheets during tour (tour across whole app)
  * auto-launch a tour and
  * remember if a user has launched a tour already (client-side, local browser storage)
+
+To get a license please contact christof.schwarz@databridge.ch
 
 ## Known limitations
 
