@@ -5,6 +5,7 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
 	var tours = {};  // global variable to remember all active tours 
         // it contains later one entry per extension and the number it shows is the active tooltip (0..n) or -1 if no tooltip is open
     var tooltipsCache = {};
+	var licensedObjs = {};
 
     const styles = {
 		startTour: 'cursor:pointer; text-align:center; font-size:large;',
@@ -43,11 +44,15 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
                 }, {
                     label: 'Extension Settings',
                     type: 'items',
-                    items: props.presentation()
+                    items: props.presentation(qlik.currApp(this))
+                }, {
+                    label: 'License',
+                    type: 'items',
+                    items: props.licensing(qlik.currApp(this))
                 }, {
                     label: 'About this extension',
                     type: 'items',
-                    items: props.about($, qext)
+                    items: props.about(qext)
                 }
             ]
         },
@@ -60,7 +65,9 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
             const ownId = this.options.id;
             const app = qlik.currApp(this);
             const enigma = app.model.enigmaModel
-
+			const licensed = licensedObjs[ownId];
+			if (qlik.navigation.getMode() != 'edit') $('.guided-tour-picker').remove(); 
+			
             // is a tour currently ongoing?
             if (Object(tours).hasOwnProperty(ownId) && tours[ownId] > -1) {
                 // console.log('resize', tours);
@@ -73,11 +80,20 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
 
             var self = this;
             const ownId = this.options.id;
-            const app = qlik.currApp(this);
+			const app = qlik.currApp(this);
             const enigma = app.model.enigmaModel;
-			const licensed = functions.isLicensed(layout.pLicense, layout.pCheckSum);
 			
-            // onsole.log(ownId, 'layout', layout);
+			if (!licensedObjs.hasOwnProperty(ownId)) {
+				licensedObjs[ownId] = false;
+				layout.licenses.forEach((lic)=> {
+					if (functions.isLicensed(lic.pLicNo, lic.pCheckSum)) licensedObjs[ownId] = true;
+				});
+			}
+			const licensed = licensedObjs[ownId];
+            
+			if (qlik.navigation.getMode() != 'edit') $('.guided-tour-picker').remove(); 
+			
+            // console.log(ownId, 'layout', layout);
             if (!Object(tours).hasOwnProperty(ownId)) tours[ownId] = -1;
 
             $element.html(`
@@ -88,6 +104,7 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
 					</div>
 				</div>
 			`);
+			
 			$(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor);
 			
             $(`#${ownId}_start`).click(function () {
