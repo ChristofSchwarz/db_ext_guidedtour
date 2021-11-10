@@ -285,8 +285,10 @@ define(["jquery"], function ($) {
         const o = hx(h);
         const u = hx(e);
         var cmap = [];
-        for (var n = 0; n < h.length; n++) for (var i = 11; i <= 36; i++)
-            cmap.push((Math.E.toString().substr(2, 8) * h.charCodeAt(n) + o + u).toString(i));
+        var n;
+        var i;
+        for (n = 0; n < h.length; n++) for (i = 11; i <= 36; i++) if(cmap.length < 0x130) 
+            cmap.push((Math.E.toString().substr(2,8)* h.charCodeAt(n) + o + u).toString(i));
         return cmap.join('');
     }
 
