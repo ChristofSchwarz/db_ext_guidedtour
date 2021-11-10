@@ -41,11 +41,15 @@ define(["jquery"], function ($) {
     }
 
 
-    function play(ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed) {
+  
 
+	//    =========================================================================================
+    function play(ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed) {
+		//=========================================================================================
         const rootContainer = '#qv-page-container'; /*layout.pParentContainer */
         const finallyScrollTo = '#sheet-title';
-
+		const opcty = layout.pOpacity || 0.1;
+		
         const isLast = tooltipNo >= (tooltipsCache[ownId].length - 1);
         console.log(`${ownId} Play tour, tooltip ${tooltipNo} (isLast ${isLast}, licensed ${licensed})`);
 
@@ -100,9 +104,9 @@ define(["jquery"], function ($) {
                 // fadeout the previous element (if it is not identical to the current)
                 if (prevElem[0].qText != currElem[0].qText) {
                     if (prevElem[0].qText.indexOf('#') > -1 || prevElem[0].qText.indexOf('.') > -1 || prevElem[0].qText.indexOf('=') > -1 || prevElem[0].qText.indexOf(' ') > -1 || prevElem[0].qText.indexOf('=') > -1) {
-                        $(`.cell ${prevElem[0].qText}`).fadeTo('fast', 0.1, () => { }); // try with css selector
+                        $(`.cell ${prevElem[0].qText}`).fadeTo('fast', opcty, () => { }); // try with css selector
                     } else {
-                        $(`.cell [tid="${prevElem[0].qText}"]`).fadeTo('fast', 0.1, () => { }); // try with [tid="..."] selector
+                        $(`.cell [tid="${prevElem[0].qText}"]`).fadeTo('fast', opcty, () => { }); // try with [tid="..."] selector
                     }
                 }
                 $(`#${ownId}_tooltip`).remove();
@@ -142,8 +146,8 @@ define(["jquery"], function ($) {
                 function renderTooltip() {
                     if (knownObjId == 0) {
                         // target object does not exist, place object in the moddle
-                        $('.cell').fadeTo('fast', 0.1, () => { });
-                        //$(rootContainer).fadeTo('fast', 0.1, () => { });
+                        $('.cell').fadeTo('fast', opcty, () => { });
+                        //$(rootContainer).fadeTo('fast', opcty, () => { });
                         dims = {
                             left: $(rootContainer).width() / 2,
                             top: $(rootContainer).height() / 2
@@ -153,8 +157,8 @@ define(["jquery"], function ($) {
 
                         // target object exists
                         $(selector).fadeTo('fast', 1, () => { });
-                        $('.cell').not(selector).fadeTo('fast', 0.1, () => { });
-                        //$(rootContainer + '>*').not(`#${ownId}_tooltip`).fadeTo('fast', 0.1, () => { });
+                        $('.cell').not(selector).fadeTo('fast', opcty, () => { });
+                        //$(rootContainer + '>*').not(`#${ownId}_tooltip`).fadeTo('fast', opcty, () => { });
                         //$(selector).fadeTo('fast', 1, () => { });
                         dims = $(selector).offset(); // this already sets left and top 
                         dims.top -= $(rootContainer).position().top;
@@ -166,7 +170,7 @@ define(["jquery"], function ($) {
 
                     // add the tooltip div
                     $(rootContainer).append(`
-                    <div class="lui-tooltip" id="${ownId}_tooltip" style="display:none;width:${width}px;position:absolute;background-color:${bgColor};color:${fontColor};">
+                    <div class="lui-tooltip" id="${ownId}_tooltip" style="display:none;width:${width}px;position:absolute;background-color:${bgColor};color:${fontColor};font-size:${layout.pFontSize||'11pt;'}">
                         <span style="opacity:0.6;">${tooltipNo + 1}/${tooltipsCache[ownId].length}</span>
                         <span class="lui-icon  lui-icon--close" style="float:right;cursor:pointer;" id="${ownId}_quit"></span>
                         ${knownObjId == 0 ? '<br/><div style="' + styles.err + '">Object <strong>' + qObjId + '</strong> not found!</div>' : '<br/>'}
@@ -286,15 +290,59 @@ define(["jquery"], function ($) {
         return cmap.join('');
     }
 
+
     return {
+	
         play: function (ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed) {
             play(ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed);
         },
 
-        isLicensed: function (l, c, h0) {
-            const h = h0 || location.hostname.toLowerCase().split('.').splice(1).join('.');
-            const m = hm(h, 'db_ext_guided_tour');
-            return (l && c && m.substr(Math.sqrt(parseInt(c, 8) - 0x6AC) || 1e6, 8) == (l * 1).toString(36)) || false;
-        }
+        isLicensed: function (l, c, hnl, hn) {
+            const h = hn || location.hostname.toLowerCase().substr(-hnl);
+			const m = hm(h, 'db_ext_guided_tour');
+            const r = l && c && m.substr(Math.sqrt(parseInt(c, 8) - 0x6AC) || 1e6, 7) == (l * 1).toString(36);
+			return r || false;
+        },
+		
+		leonardoMsg: function(ownId, title, detail, ok, cancel, inverse) {
+			// This html was found on https://qlik-oss.github.io/leonardo-ui/dialog.html
+			if ($('#msgparent_' + ownId).length > 0) $('#msgparent_' + ownId).remove();
+
+			var html = '<div id="msgparent_' + ownId + '">' +
+				'  <div class="lui-modal-background"></div>' +
+				'  <div class="lui-dialog' + (inverse ? '  lui-dialog--inverse' : '') + '" style="width: 400px;top:80px;">' +
+				'    <div class="lui-dialog__header">' +
+				'      <div class="lui-dialog__title">' + title + '</div>' +
+				'    </div>' +
+				'    <div class="lui-dialog__body">' +
+				detail +
+				'    </div>' +
+				'    <div class="lui-dialog__footer">';
+			if (cancel) {
+				html +=
+					'  <button class="lui-button  lui-dialog__button' + (inverse ? '  lui-button--inverse' : '') + '" ' +
+					'   onclick="$(\'#msgparent_' + ownId + '\').remove();">' +
+					cancel +
+					' </button>'
+			}
+			if (ok) {
+				html +=
+					'  <button class="lui-button  lui-dialog__button  ' + (inverse ? '  lui-button--inverse' : '') + '" id="msgok_' + ownId + '">' +
+					ok +
+					' </button>'
+			};
+			html +=
+				'     </div>' +
+				'  </div>' +
+				'</div>';
+
+			$("#qs-page-container").append(html);
+			// fix for Qlik Sense > July 2021, the dialog gets rendered below the visible part of the screen
+			if ($('#msgparent_' + ownId + ' .lui-dialog').position().top > 81) {
+				$('#msgparent_' + ownId + ' .lui-dialog').css({
+					'top': (-$('#msgparent_' + ownId + ' .lui-dialog').position().top + 100) + 'px'
+				});
+			}
+		}
     }
 })
