@@ -4,9 +4,8 @@ We license the server url (one * wildcard allowed), so that a license is valid f
 If you have multiple nodes or DNS synonyms for the same environment, we can combine multiple host names into one license.
 With your transaction, you will get a license string (in Json format) from databridge like the below examples:
 
-`{"*.prod.databridge.ch":[5262148576,6120],"*.dev.databridge.ch":[5262148576,6120]}` 
-
-`{"databridge-internal.eu.qlikcloud.com":[4563262434,3142]}`
+ * `{"*.prod.databridge.ch":[5262148576,6120],"*.dev.databridge.ch":[5262148576,6120]}` 
+ * `{"databridge-internal.eu.qlikcloud.com":[4563262434,3142]}`
 
 which needs to be put into the extension itself:
 <p align="center">
