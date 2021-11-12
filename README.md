@@ -23,7 +23,7 @@ If the data table doesn't have a value (length zero or null) then the default se
 
 If you don't want different attributes per tooltip, but all to look the same, just use the default settings.
 <p align="center">
- <img src="./dynsettings.png"> 
+ <img src="./pics/dynsettings.png" width="500"> 
 </p>
 
 The extension also allows to configure the texts for "Start Tour", "Next" and "Done" links.
