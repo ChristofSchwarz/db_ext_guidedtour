@@ -2,7 +2,7 @@
 
 define(["jquery"], function ($) {
 
-    const showAd = false;
+    const ext = 'db_ext_guided_tour';
     const arrowHeadSize = 20;
     const styles = {
         err: 'background-color:red; color:white; text-align:center; padding:2px; margin-top:3px;',
@@ -41,15 +41,15 @@ define(["jquery"], function ($) {
     }
 
 
-  
 
-	//    =========================================================================================
+
+    //    =========================================================================================
     function play(ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed) {
-		//=========================================================================================
+        //=========================================================================================
         const rootContainer = '#qv-page-container'; /*layout.pParentContainer */
         const finallyScrollTo = '#sheet-title';
-		const opcty = layout.pOpacity || 0.1;
-		
+        const opcty = layout.pOpacity || 0.1;
+
         const isLast = tooltipNo >= (tooltipsCache[ownId].length - 1);
         console.log(`${ownId} Play tour, tooltip ${tooltipNo} (isLast ${isLast}, licensed ${licensed})`);
 
@@ -170,7 +170,7 @@ define(["jquery"], function ($) {
 
                     // add the tooltip div
                     $(rootContainer).append(`
-                    <div class="lui-tooltip" id="${ownId}_tooltip" style="display:none;width:${width}px;position:absolute;background-color:${bgColor};color:${fontColor};font-size:${layout.pFontSize||'11pt;'}">
+                    <div class="lui-tooltip" id="${ownId}_tooltip" style="display:none;width:${width}px;position:absolute;background-color:${bgColor};color:${fontColor};font-size:${layout.pFontSize || '11pt;'}">
                         <span style="opacity:0.6;">${tooltipNo + 1}/${tooltipsCache[ownId].length}</span>
                         <span class="lui-icon  lui-icon--close" style="float:right;cursor:pointer;" id="${ownId}_quit"></span>
                         ${knownObjId == 0 ? '<br/><div style="' + styles.err + '">Object <strong>' + qObjId + '</strong> not found!</div>' : '<br/>'}
@@ -272,6 +272,14 @@ define(["jquery"], function ($) {
         }
     }
 
+    function patternize(hn, d) {
+        return d.indexOf('*') == -1 ? hn
+            : ([
+                hn.substr(0, d.indexOf('*')),
+                d.substr(-1) == '*' ? '' : hn.substr(1 - d.length + d.indexOf('*'))
+            ].join(d.indexOf('*') == -1 ? '' : '*'));
+    }
+
     function hx(s) {
         var x = 0;
         for (var j = 0; j < s.length; j++) {
@@ -287,64 +295,88 @@ define(["jquery"], function ($) {
         var cmap = [];
         var n;
         var i;
-        for (n = 0; n < h.length; n++) for (i = 11; i <= 36; i++) if(cmap.length < 0x130) 
-            cmap.push((Math.E.toString().substr(2,8)* h.charCodeAt(n) + o + u).toString(i));
+        for (n = 0; n < h.length; n++) for (i = 11; i <= 36; i++) if (cmap.length < 0x130)
+            cmap.push((Math.E.toString().substr(2, 8) * h.charCodeAt(n) + o + u).toString(i));
         return cmap.join('');
     }
 
+    function isLicensed(h, l, c) {
+        const m = hm(h, ext);
+        const r = l && c && h && (m.substr(Math.sqrt(parseInt(c, 8) - 0x6AC) || 1e6, 7) == (l * 1).toString(36));
+        return r || false;
+    }
 
     return {
-	
+
         play: function (ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed) {
             play(ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed);
         },
 
-        isLicensed: function (l, c, hnl, hn) {
-            const h = hn || location.hostname.toLowerCase().substr(-hnl);
-			const m = hm(h, 'db_ext_guided_tour');
-            const r = l && c && m.substr(Math.sqrt(parseInt(c, 8) - 0x6AC) || 1e6, 7) == (l * 1).toString(36);
-			return r || false;
+        hm: function (h, e) {
+            return hm(h, e);
         },
-		
-		leonardoMsg: function(ownId, title, detail, ok, cancel, inverse) {
-			// This html was found on https://qlik-oss.github.io/leonardo-ui/dialog.html
-			if ($('#msgparent_' + ownId).length > 0) $('#msgparent_' + ownId).remove();
 
-			var html = '<div id="msgparent_' + ownId + '">' +
-				'  <div class="lui-modal-background"></div>' +
-				'  <div class="lui-dialog' + (inverse ? '  lui-dialog--inverse' : '') + '" style="width: 400px;top:80px;">' +
-				'    <div class="lui-dialog__header">' +
-				'      <div class="lui-dialog__title">' + title + '</div>' +
-				'    </div>' +
-				'    <div class="lui-dialog__body">' +
-				detail +
-				'    </div>' +
-				'    <div class="lui-dialog__footer">';
-			if (cancel) {
-				html +=
-					'  <button class="lui-button  lui-dialog__button' + (inverse ? '  lui-button--inverse' : '') + '" ' +
-					'   onclick="$(\'#msgparent_' + ownId + '\').remove();">' +
-					cancel +
-					' </button>'
-			}
-			if (ok) {
-				html +=
-					'  <button class="lui-button  lui-dialog__button  ' + (inverse ? '  lui-button--inverse' : '') + '" id="msgok_' + ownId + '">' +
-					ok +
-					' </button>'
-			};
-			html +=
-				'     </div>' +
-				'  </div>' +
-				'</div>';
+        isLicensed: function (h, l, c) {
+            return isLicensed(h, l, c);
+        },
 
-			$("#qs-page-container").append(html);
-			// fix for Qlik Sense > July 2021, the dialog gets rendered below the visible part of the screen
-			if ($('#msgparent_' + ownId + ' .lui-dialog').position().top > 81) {
-				$('#msgparent_' + ownId + ' .lui-dialog').css({
-					'top': (-$('#msgparent_' + ownId + ' .lui-dialog').position().top + 100) + 'px'
-				});
-			}
-		}
+        patternize: function (hn, d) {
+            return patternize(hn, d)
+        },
+
+        chkLicenseJSON: function (lstr) {
+            var r = false;
+            try {
+                const j = JSON.parse(lstr);
+                for (const d in j) {
+                    const h = patternize(location.hostname, d);
+                    const m = hm(h, ext);
+                    r = isLicensed(h, j[d][0], j[d][1])
+                }
+            }
+            catch (err) { };
+            return r;
+        },
+
+        leonardoMsg: function (ownId, title, detail, ok, cancel, inverse) {
+            // This html was found on https://qlik-oss.github.io/leonardo-ui/dialog.html
+            if ($('#msgparent_' + ownId).length > 0) $('#msgparent_' + ownId).remove();
+
+            var html = '<div id="msgparent_' + ownId + '">' +
+                '  <div class="lui-modal-background"></div>' +
+                '  <div class="lui-dialog' + (inverse ? '  lui-dialog--inverse' : '') + '" style="width: 400px;top:80px;">' +
+                '    <div class="lui-dialog__header">' +
+                '      <div class="lui-dialog__title">' + title + '</div>' +
+                '    </div>' +
+                '    <div class="lui-dialog__body">' +
+                detail +
+                '    </div>' +
+                '    <div class="lui-dialog__footer">';
+            if (cancel) {
+                html +=
+                    '  <button class="lui-button  lui-dialog__button' + (inverse ? '  lui-button--inverse' : '') + '" ' +
+                    '   onclick="$(\'#msgparent_' + ownId + '\').remove();">' +
+                    cancel +
+                    ' </button>'
+            }
+            if (ok) {
+                html +=
+                    '  <button class="lui-button  lui-dialog__button  ' + (inverse ? '  lui-button--inverse' : '') + '" id="msgok_' + ownId + '">' +
+                    ok +
+                    ' </button>'
+            };
+            html +=
+                '     </div>' +
+                '  </div>' +
+                '</div>';
+
+            $("#qs-page-container").append(html);
+            // fix for Qlik Sense > July 2021, the dialog gets rendered below the visible part of the screen
+            if ($('#msgparent_' + ownId + ' .lui-dialog').position().top > 81) {
+                $('#msgparent_' + ownId + ' .lui-dialog').css({
+                    'top': (-$('#msgparent_' + ownId + ' .lui-dialog').position().top + 100) + 'px'
+                });
+            }
+        }
     }
 })
