@@ -12,7 +12,7 @@ define(["jquery", "./functions"], function ($, functions) {
             component: 'expandable-items',
             items: {}
         };
-		var hash = 0;
+        var hash = 0;
         for (var j = 0; j < labelText.length; j++) {
             hash = ((hash << 5) - hash) + labelText.charCodeAt(j)
             hash |= 0;
@@ -198,7 +198,7 @@ define(["jquery", "./functions"], function ($, functions) {
                         label: 'More styling',
                         type: 'string',
                         ref: 'pMoreStyles',
-						defaultValue: 'font-size:large;',
+                        defaultValue: 'font-size:large;',
                         expression: 'optional'
                     }
                 ]), subSection('Tooltips Texts & Colors', [
@@ -241,47 +241,47 @@ define(["jquery", "./functions"], function ($, functions) {
                     }
                 ]), subSection('Auto-launch Tour \u2605', [
                     {
-                    label: "These settings apply only if you have a licensed version.",
-                    component: "text"
-                }, {
+                        label: "These settings apply only if you have a licensed version.",
+                        component: "text"
+                    }, {
                         label: 'Automatically show this tour',
                         type: 'string',
-						component: 'dropdown',
+                        component: 'dropdown',
                         ref: 'pAutoLaunch',
-						defaultValue: 'no',
-						options: [{
-							value: "no",
-							label: "No auto-launch"
-						}, {
-							value: "once",
-							label: "Launch once per user"
-						},{
-							value: "always",
-							label: "Always auto-launch"
-						}]
+                        defaultValue: 'no',
+                        options: [{
+                            value: "no",
+                            label: "No auto-launch"
+                        }, {
+                            value: "once",
+                            label: "Launch once per user"
+                        }, {
+                            value: "always",
+                            label: "Always auto-launch"
+                        }]
                     }, {
                         label: 'Relaunch once after',
                         type: 'string',
                         ref: 'pRelaunchAfter',
                         defaultValue: '189912312359',
                         expression: 'optional',
-						show: function(arg) { return arg.pAutoLaunch == 'once'}
+                        show: function (arg) { return arg.pAutoLaunch == 'once' }
                     }, {
-						label: "Format: YYYYMMDDhhmm",
-						component: "text",
-						show: function(arg) { return arg.pAutoLaunch == 'once'}
-					}, {
-						label: function(arg) { return 'Saved settings: ' + window.localStorage.getItem(app.id + '|' + arg.qInfo.qId) },
-						component: "text",
-						show: function(arg) { return arg.pAutoLaunch == 'once'}
-					}, {
-						label: "Clear saved settings",
-						component: "button",
-						action: function (arg) {
-							window.localStorage.removeItem(app.id + '|' + arg.qInfo.qId);
-							functions.leonardoMsg(arg.qInfo.qId,'Success','Removed local item',null,'OK');
-						}
-					}
+                        label: "Format: YYYYMMDDhhmm",
+                        component: "text",
+                        show: function (arg) { return arg.pAutoLaunch == 'once' }
+                    }, {
+                        label: function (arg) { return 'Saved settings: ' + window.localStorage.getItem(app.id + '|' + arg.qInfo.qId) },
+                        component: "text",
+                        show: function (arg) { return arg.pAutoLaunch == 'once' }
+                    }, {
+                        label: "Clear saved settings",
+                        component: "button",
+                        action: function (arg) {
+                            window.localStorage.removeItem(app.id + '|' + arg.qInfo.qId);
+                            functions.leonardoMsg(arg.qInfo.qId, 'Success', 'Removed local item', null, 'OK');
+                        }
+                    }
                 ]), subSection('Advanced Settings', [
                     {
                         label: 'Font Size',
@@ -369,12 +369,12 @@ define(["jquery", "./functions"], function ($, functions) {
                                     r = functions.isLicensed(d, j[d][0], j[d][1]);
                                     report += (`<tr><td>${d}</td><td>${applicable}</td><td>${j[d][0]}</td><td>${j[d][1]}</td><td>${r}</td></tr>`);
                                 }
-								if (report=='')
-									functions.leonardoMsg(ownId, 'Error', "This isn't a valid license.", null, 'OK')
-								else
-                                	functions.leonardoMsg(ownId, 'Result',
-                                    '<table><tr style="text-align:left;"><th>Domain</th><th>Applies?</th><th>License No.</th><th>CheckSum</th><th>Valid?</th></tr>'
-                                    + report + '</table>', null, 'OK');
+                                if (report == '')
+                                    functions.leonardoMsg(ownId, 'Error', "This isn't a valid license.", null, 'OK')
+                                else
+                                    functions.leonardoMsg(ownId, 'Result',
+                                        '<table><tr style="text-align:left;"><th>Domain</th><th>Applies?</th><th>License No.</th><th>CheckSum</th><th>Valid?</th></tr>'
+                                        + report + '</table>', null, 'OK');
                             }
                             catch (err) {
                                 functions.leonardoMsg(ownId, 'Error', "This isn't a valid license.", null, 'OK');
