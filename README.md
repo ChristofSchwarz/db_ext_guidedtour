@@ -6,7 +6,7 @@ This extension allows to make a tour of colored tooltips (text bubbles) which hi
  ![screenshot](https://github.com/ChristofSchwarz/pics/raw/master/GuidedTour.gif "Animation")
 
 
-## How to set up
+## Getting started
 To render, it requires a data table loaded by data manager or load script with at least 2 colums: 
 
 1. Qlik objectId
@@ -21,7 +21,10 @@ Supported are up to 5 columns. So you can add up to 3 more columns which define 
 You will find dropdowns in the properties of the extension to choose which dimension (3rd, 4th, 5th) will deliver which attribute. 
 If the data table doesn't have a value (length zero or null) then the default setting for bg-color, text-color, and width kicks in.
 
-If you don't need changing parameters for per tooltip, but all to look the same, just use the default settings.
+If you don't want different attributes per tooltip, but all to look the same, just use the default settings.
+<p align="center">
+ <img src="./dynsettings.png"> 
+</p>
 
 The extension also allows to configure the texts for "Start Tour", "Next" and "Done" links.
 
