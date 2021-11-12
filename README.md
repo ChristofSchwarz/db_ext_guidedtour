@@ -58,7 +58,7 @@ for the licensed product only:
  * auto-launch a tour and
  * remember if a user has launched a tour already (client-side, local browser storage)
 
-To get a license please contact christof.schwarz@databridge.ch
+Read more [here](licensing.md)
 
 ## Known limitations
 
