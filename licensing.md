@@ -9,9 +9,13 @@ With your transaction, you will get a license string (in Json format) from datab
 
 which needs to be put into the extension itself:
 
-![screenshot](./pics/licensing(1).png =x350)
+<img src="./pics/licensing(1).png" width="350">
 
 If you will use multiple times the Guided Tour extension, put the license itself into a variable and refer to it from within the extension settings
 
-![screenshot](./pics/licensing(2).png =x350)
+```
+SET vGuidedTourLicense = {"*.databridge.ch":[13728457009,6725660]};
+```
+<img src="./pics/licensing(2).png" width="350">
+
 
