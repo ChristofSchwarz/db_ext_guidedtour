@@ -1,5 +1,7 @@
 # How to license the extension
 
+go to [Main](readme.md)
+
 We license the server url (one * wildcard allowed), so that a license is valid for **one environment** and indepenent from #users and #apps which use it.
 If you have multiple nodes or DNS synonyms for the same environment, we can combine multiple host names into one license.
 With your transaction, you will get a license string (in Json format) from databridge like the below examples:
