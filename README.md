@@ -63,3 +63,4 @@ Read more [here](licensing.md)
 ## Known limitations
 
  * In small-device mode of the Sense Client, the tooltips do not render nicely.
+ * Currently Internet Explorer is not supported
