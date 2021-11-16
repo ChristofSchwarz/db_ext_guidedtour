@@ -352,6 +352,10 @@ define(["jquery", "./functions"], function ($, functions) {
                     component: "link",
                     url: 'https://www.databridge.ch/contact-us'
                 }, {
+                        label: 'Test response for this hostname',
+                        type: 'string',
+                        ref: 'pTestHostname'
+                }, {
                     label: "Check License",
                     component: "button",
                     action: function (arg) {
@@ -359,22 +363,29 @@ define(["jquery", "./functions"], function ($, functions) {
                         const ownId = arg.qInfo.qId;
                         resolveProperty(arg.pLicenseJSON, enigma).then((lstr) => {
                             console.log('License String', lstr);
-                            var report = '';
+							const hostname = arg.pTestHostname ? (arg.pTestHostname.length > 0 ? arg.pTestHostname : location.hostname) : location.hostname;
+							var report = '<p>Checking license for hostname "' + hostname + '"</p><br>'
+							+ '<table><tr style="text-align:left;"><th>Domain</th><th>Applies?</th><th>License No.</th><th>CheckSum</th><th>Valid?</th></tr>';
+							var anyApplicable = false;
+							var anyValid = false;
                             try {
                                 const j = JSON.parse(lstr);
                                 console.log('License JSON', j);
                                 for (const d in j) {
-                                    const applicable = d == functions.patternize(location.hostname, d);
+                                    const applicable = d == functions.patternize(hostname, d);
+									anyApplicable = anyApplicable || applicable;
                                     const m = functions.hm(d, ext);
-                                    r = functions.isLicensed(d, j[d][0], j[d][1]);
-                                    report += (`<tr><td>${d}</td><td>${applicable}</td><td>${j[d][0]}</td><td>${j[d][1]}</td><td>${r}</td></tr>`);
+									console.log(m);
+                                    const valid = functions.isLicensed(d, j[d][0], j[d][1]);
+									anyValid = anyValid || valid;
+                                    report += (`<tr><td>${d}</td><td>${applicable}</td><td>${j[d][0]}</td><td>${j[d][1]}</td><td>${valid}</td></tr>`);
                                 }
-                                if (report == '')
-                                    functions.leonardoMsg(ownId, 'Error', "This isn't a valid license.", null, 'OK')
-                                else
-                                    functions.leonardoMsg(ownId, 'Result',
-                                        '<table><tr style="text-align:left;"><th>Domain</th><th>Applies?</th><th>License No.</th><th>CheckSum</th><th>Valid?</th></tr>'
-                                        + report + '</table>', null, 'OK');
+                                report += '</table><br><p>' 
+									+ (anyValid && anyApplicable ? '&#10003; You have a valid and applicable license' : '&#10060; Your license is not valid or not applicable')
+									+ '</p>'
+                                functions.leonardoMsg(ownId, 'Result', report, null, 'OK');
+								// make window wider
+								$('#msgparent_' + ownId + ' .lui-dialog').css('width', '600px');
                             }
                             catch (err) {
                                 functions.leonardoMsg(ownId, 'Error', "This isn't a valid license.", null, 'OK');
