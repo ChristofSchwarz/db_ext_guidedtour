@@ -1,6 +1,6 @@
 // props.js: Extension properties (accordeon menu) externalized
 
-define(["jquery", "./functions"], function ($, functions) {
+define(["jquery", "./functions", "./license"], function ($, functions, license) {
 
     var pickList = [];
     var pickList2 = [];
@@ -79,6 +79,32 @@ define(["jquery", "./functions"], function ($, functions) {
                     label: "The first two dimensions are mandatory: object-id and text",
                     component: "text"
                 }, {
+                    label: 'Mode to launch tour',
+                    type: 'string',
+                    component: 'dropdown',
+                    ref: 'pLaunchMode',
+                    defaultValue: 'click',
+                    options: [{
+                        value: "click",
+                        label: "Click to run tour"
+                    }, {
+                        value: "hover",
+                        label: "Move mouse over objects \u2605"
+                    }, {
+                        value: "auto-once",
+                        label: "Auto-launch once \u2605"
+                    }, {
+                        value: "auto-always",
+                        label: "Auto-launch always"
+                    }]
+                }, {
+                    label: "Note: Mouse-over mode only supports Sense object IDs, no other CSS-selectors.",
+                    component: "text",
+					show: function(arg) { return arg.pLaunchMode == 'hover' }
+                },{
+                    label: "\u2605 Premium feature only with license",
+                    component: "text"
+                }, {
                     label: "Select objects for tour",
                     component: "button",
                     action: function (arg) {
@@ -89,7 +115,7 @@ define(["jquery", "./functions"], function ($, functions) {
                             cursor:pointer; color:white; border-radius: 10px; padding: 0 10px;" 
                             class="guided-tour-picker">PICK</div>`);
 
-                        $('.guided-tour-picker').click((me) => {
+                        $('.guided-tour-picker').click(function (me) {
                             var parent = me.currentTarget;
                             // go up the parents tree until the level where the class contains 'cell'
                             var i = 0;
@@ -103,7 +129,7 @@ define(["jquery", "./functions"], function ($, functions) {
                                 console.log(ownId, 'Picked object Id ' + objId);
                                 pickList.push(objId);
                                 pickList2.push(objId);
-                                enigma.getObject(objId).then((obj) => {
+                                enigma.getObject(objId).then(function (obj) {
                                     //get more info about the object (type and title)
                                     pickList[pickList.length - 1] += `,"${obj.layout.visualization} ${obj.layout.title}"`;
                                 });
@@ -111,9 +137,9 @@ define(["jquery", "./functions"], function ($, functions) {
                                 $(`[tid="${objId}"] .guided-tour-picker`).css('background-color', 'orange');
                                 $(`[tid="${ownId}"] .guided-tour-picker`).css('background-color', 'orange');
                                 $(`[tid="${ownId}"] .guided-tour-picks`).html('(' + pickList.length + ')');
-                                setTimeout(() => {
+                                setTimeout(function () {
                                     $(`[tid="${objId}"] .guided-tour-picker`).css('background-color', bgColorPickers);
-                                    setTimeout(() => {
+                                    setTimeout(function () {
                                         $(`[tid="${ownId}"] .guided-tour-picker`).css('background-color', bgColorPickers);
                                     }, 400);
                                 }, 400);
@@ -129,7 +155,7 @@ define(["jquery", "./functions"], function ($, functions) {
                             cursor:pointer; color:white; border-radius: 10px; padding: 0 10px;" 
                             class="guided-tour-picker">DONE <span class="guided-tour-picks"></span></div>`);
 
-                        $(`[tid="${ownId}"] .guided-tour-picker`).click((me) => {
+                        $(`[tid="${ownId}"] .guided-tour-picker`).click(function (me) {
                             console.log('Those are the objectIds you picked:');
                             console.log(pickList.join('\n'));
                             functions.leonardoMsg(ownId, 'Picked Objects',
@@ -150,9 +176,9 @@ define(["jquery", "./functions"], function ($, functions) {
                                 <textarea class="lui-textarea" style="height:140px;font-size:11pt;margin:10px 0;" id="${ownId}_textarea">${pickList.join('\n')}</textarea>
                                 <button class="lui-button" onclick="document.getElementById('${ownId}_textarea').select();document.execCommand('copy');">Copy to clipboard</button>`,
                                 'Close', null, false);
-                            $(`#${ownId}_opt1`).click(() => { $(`#${ownId}_textarea`).html(pickList.join('\n')); });
-                            $(`#${ownId}_opt2`).click(() => { $(`#${ownId}_textarea`).html(pickList2.join('\n')); });
-                            $(`#msgok_${ownId}`).click(() => { $(`#msgparent_${ownId}`).remove(); pickList = []; pickList2 = []; });
+                            $(`#${ownId}_opt1`).click(function () { $(`#${ownId}_textarea`).html(pickList.join('\n')); });
+                            $(`#${ownId}_opt2`).click(function () { $(`#${ownId}_textarea`).html(pickList2.join('\n')); });
+                            $(`#msgok_${ownId}`).click(function () { $(`#msgparent_${ownId}`).remove(); pickList = []; pickList2 = []; });
                             $('.guided-tour-picker').remove();
                         })
 
@@ -180,10 +206,25 @@ define(["jquery", "./functions"], function ($, functions) {
                         defaultValue: 'Start Tour',
                         expression: 'optional'
                     }, {
+                        label: "Mouse-Over Mode \u2605",
+                        type: "boolean",
+                        component: "switch",
+                        ref: "pHoverMode",
+                        defaultValue: false,
+                        trueOption: {
+                            value: true,
+                            translation: "On - Hover tooltips"
+                        },
+                        falseOption: {
+                            value: false,
+                            translation: "Off - Sequential Tour"
+                        }
+                    }, {
                         type: "boolean",
                         defaultValue: true,
                         ref: "pShowIcon",
-                        label: "Show play icon"
+                        label: "Show play icon",
+                        show: function (arg) { return !arg.pHoverMode }
                     }, {
                         label: 'Background-color of button',
                         type: 'string',
@@ -238,45 +279,39 @@ define(["jquery", "./functions"], function ($, functions) {
                         ref: "pFontColorFromDim",
                         defaultValue: "",
                         options: function (arg) { return getDimNames(arg); }
-                    }
-                ]), subSection('Auto-launch Tour \u2605', [
-                    {
-                        label: "These settings apply only if you have a licensed version.",
-                        component: "text"
                     }, {
-                        label: 'Automatically show this tour',
-                        type: 'string',
-                        component: 'dropdown',
-                        ref: 'pAutoLaunch',
-                        defaultValue: 'no',
-                        options: [{
-                            value: "no",
-                            label: "No auto-launch"
-                        }, {
-                            value: "once",
-                            label: "Launch once per user"
-                        }, {
-                            value: "always",
-                            label: "Always auto-launch"
-                        }]
+						type: "number",
+						component: "slider",
+						label: function(arg) { return 'ArrowHead Size ' + arg.pArrowHead + 'px' },
+						ref: "pArrowHead",
+						min: 8,
+						max: 20,
+						step: 4,
+						defaultValue: 16
+					}
+                ]), subSection('Auto-launch Settings \u2605', [
+                    {
+                        label: "These settings apply only if you have a licensed version and the mode is 'Auto-lauch once'.",
+                        component: "text"
                     }, {
                         label: 'Relaunch once after',
                         type: 'string',
                         ref: 'pRelaunchAfter',
                         defaultValue: '189912312359',
                         expression: 'optional',
-                        show: function (arg) { return arg.pAutoLaunch == 'once' }
+                        show: function (arg) { return arg.pLaunchMode == 'once' }
                     }, {
                         label: "Format: YYYYMMDDhhmm",
                         component: "text",
-                        show: function (arg) { return arg.pAutoLaunch == 'once' }
+                        show: function (arg) { return arg.pLaunchMode == 'once' }
                     }, {
                         label: function (arg) { return 'Saved settings: ' + window.localStorage.getItem(app.id + '|' + arg.qInfo.qId) },
                         component: "text",
-                        show: function (arg) { return arg.pAutoLaunch == 'once' }
+                        show: function (arg) { return arg.pLaunchMode == 'once' }
                     }, {
                         label: "Clear saved settings",
                         component: "button",
+						show: function (arg) { return arg.pLaunchMode == 'once' },
                         action: function (arg) {
                             window.localStorage.removeItem(app.id + '|' + arg.qInfo.qId);
                             functions.leonardoMsg(arg.qInfo.qId, 'Success', 'Removed local item', null, 'OK');
@@ -329,10 +364,7 @@ define(["jquery", "./functions"], function ($, functions) {
                         defaultValue: '#qv-page-container',
                         expression: 'optional'
                     }*/
-                ]), {
-                    label: "\u2605 Premium feature only with license",
-                    component: "text"
-                }
+                ])
             ]
         },
 
@@ -352,44 +384,22 @@ define(["jquery", "./functions"], function ($, functions) {
                     component: "link",
                     url: 'https://www.databridge.ch/contact-us'
                 }, {
-                        label: 'Test response for this hostname',
-                        type: 'string',
-                        ref: 'pTestHostname'
+                    label: 'Test response for this hostname',
+                    type: 'string',
+                    ref: 'pTestHostname'
                 }, {
                     label: "Check License",
                     component: "button",
                     action: function (arg) {
 
                         const ownId = arg.qInfo.qId;
-                        resolveProperty(arg.pLicenseJSON, enigma).then((lstr) => {
-                            console.log('License String', lstr);
-							const hostname = arg.pTestHostname ? (arg.pTestHostname.length > 0 ? arg.pTestHostname : location.hostname) : location.hostname;
-							var report = '<p>Checking license for hostname "' + hostname + '"</p><br>'
-							+ '<table><tr style="text-align:left;"><th>Domain</th><th>Applies?</th><th>License No.</th><th>CheckSum</th><th>Valid?</th></tr>';
-							var anyApplicable = false;
-							var anyValid = false;
-                            try {
-                                const j = JSON.parse(lstr);
-                                console.log('License JSON', j);
-                                for (const d in j) {
-                                    const applicable = d == functions.patternize(hostname, d);
-									anyApplicable = anyApplicable || applicable;
-                                    const m = functions.hm(d, ext);
-									console.log(m);
-                                    const valid = functions.isLicensed(d, j[d][0], j[d][1]);
-									anyValid = anyValid || valid;
-                                    report += (`<tr><td>${d}</td><td>${applicable}</td><td>${j[d][0]}</td><td>${j[d][1]}</td><td>${valid}</td></tr>`);
-                                }
-                                report += '</table><br><p>' 
-									+ (anyValid && anyApplicable ? '&#10003; You have a valid and applicable license' : '&#10060; Your license is not valid or not applicable')
-									+ '</p>'
-                                functions.leonardoMsg(ownId, 'Result', report, null, 'OK');
-								// make window wider
-								$('#msgparent_' + ownId + ' .lui-dialog').css('width', '600px');
-                            }
-                            catch (err) {
-                                functions.leonardoMsg(ownId, 'Error', "This isn't a valid license.", null, 'OK');
-                            };
+                        resolveProperty(arg.pLicenseJSON, enigma).then(function (lstr) { 
+                            const hostname = arg.pTestHostname ? (arg.pTestHostname.length > 0 ? arg.pTestHostname : location.hostname) : location.hostname;
+                            const report = license.chkLicenseJson(lstr, 'db_ext_guided_tour', hostname, true);
+                            functions.leonardoMsg(ownId, 'Result', report, null, 'OK');
+							$('#msgparent_' + ownId + ' th').css('text-align','left');
+                            // make window wider
+                            if(report.length > 200) $('#msgparent_' + ownId + ' .lui-dialog').css('width', '700px');
                         });
                     }
                 }
