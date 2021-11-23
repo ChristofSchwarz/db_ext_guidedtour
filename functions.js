@@ -1,30 +1,35 @@
 // functions.js: function play externalized 
 
-define(["jquery"], function ($) {
+define(["jquery", "./license"], function ($, license) {
 
-    const ext = 'db_ext_guided_tour';
-    const arrowHeadSize = 20;
+
     const styles = {
         err: 'background-color:red; color:white; text-align:center; padding:2px; margin-top:3px;',
+		
         nextButton: 'float:right; height:auto; margin-top:10px;',
-        arrowLeft: function (col, height, offset) {
+		
+        arrowLeft: function (col, height, offset, arrowHeadSize) {
             return `<div 
-                style="border-color: rgba(0,0,0,0) ${col} rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; border-width:${arrowHeadSize}px; position:absolute; left:-40px; top:${height / 2 - arrowHeadSize / 2 + offset}px">
+                style="border-color: rgba(0,0,0,0) ${col} rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; 
+				border-width:${arrowHeadSize}px; position:absolute; left:${-2*arrowHeadSize}px; top:${height / 2 - arrowHeadSize / 2 + offset}px">
             </div>`;
         },
-        arrowRight: function (col, height, offset) {
+        arrowRight: function (col, height, offset, arrowHeadSize) {
             return `<div 
-                style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0) ${col}; border-style:solid; border-width:${arrowHeadSize}px; position:absolute; right:-40px; top:${height / 2 - arrowHeadSize / 2 + offset}px">
+                style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0) ${col}; border-style:solid; 
+				border-width:${arrowHeadSize}px; position:absolute; right:${-2*arrowHeadSize}px; top:${height / 2 - arrowHeadSize / 2 + offset}px">
             </div>`;
         },
-        arrowBottom: function (col, width, offset) {
+        arrowBottom: function (col, width, offset, arrowHeadSize) {
             return `<div 
-               style="border-color: ${col} rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; border-width:${arrowHeadSize}px; position:absolute; left:${width / 2 - arrowHeadSize / 2 + offset}px; bottom:-40px;">
+               style="border-color: ${col} rgba(0,0,0,0) rgba(0,0,0,0) rgba(0,0,0,0); border-style:solid; 
+			   border-width:${arrowHeadSize}px; position:absolute; left:${width / 2 - arrowHeadSize / 2 + offset}px; bottom:${-2*arrowHeadSize}px;">
             </div>`;
         },
-        arrowTop: function (col, width, offset) {
+        arrowTop: function (col, width, offset, arrowHeadSize) {
             return `<div 
-                style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) ${col} rgba(0,0,0,0); border-style:solid; border-width:${arrowHeadSize}px; position:absolute; left:${width / 2 - arrowHeadSize / 2 + offset}px; top:-40px;">
+                style="border-color: rgba(0,0,0,0) rgba(0,0,0,0) ${col} rgba(0,0,0,0); border-style:solid; 
+				border-width:${arrowHeadSize}px; position:absolute; left:${width / 2 - arrowHeadSize / 2 + offset}px; top:${-2*arrowHeadSize}px;">
             </div>`;
         }
     }
@@ -46,6 +51,7 @@ define(["jquery"], function ($) {
     //    =========================================================================================
     function play(ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed) {
         //=========================================================================================
+		const arrowHeadSize = layout.pArrowHead || 16;
         const rootContainer = '#qv-page-container'; /*layout.pParentContainer */
         const finallyScrollTo = '#sheet-title';
         const opcty = layout.pOpacity || 0.1;
@@ -218,7 +224,9 @@ define(["jquery"], function ($) {
                                 .css('left', dims.left - dims.reqWidth - layout.pOffsetLeft)
                                 .css('top', Math.max(dims.top + dims.height / 2 - dims.reqHeight / 2, 0));
                             const offsetTop = Math.min(dims.top + dims.height / 2 - dims.reqHeight / 2, 0);
-                            $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowRight(bgColor, dims.reqHeight, offsetTop - arrowHeadSize / 2));
+                            $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(
+								styles.arrowRight(bgColor, dims.reqHeight, offsetTop - arrowHeadSize / 2, arrowHeadSize)
+							);
                         }
                         if (orientation == 'r') {
                             dims.reqHeight -= arrowHeadSize; // arrow will be to the left
@@ -226,7 +234,9 @@ define(["jquery"], function ($) {
                                 .css('left', dims.left + dims.width + arrowHeadSize)
                                 .css('top', Math.max(dims.top + dims.height / 2 - dims.reqHeight / 2, 0));
                             const offsetTop = Math.min(dims.top + dims.height / 2 - dims.reqHeight / 2, 0);
-                            $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowLeft(bgColor, dims.reqHeight, offsetTop - arrowHeadSize / 2));
+                            $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(
+								styles.arrowLeft(bgColor, dims.reqHeight, offsetTop - arrowHeadSize / 2, arrowHeadSize)
+							);
                         }
 
                         if (orientation == 't' || orientation == 't!') {
@@ -235,7 +245,9 @@ define(["jquery"], function ($) {
                                 .css('left', Math.max(dims.left + dims.width / 2 - dims.reqWidth / 2, 0))
                                 .css('top', orientation == 't!' ? 0 : (dims.top - dims.reqHeight - layout.pOffsetTop));
                             const offsetLeft = Math.min(dims.left + dims.width / 2 - dims.reqWidth / 2, 0);
-                            $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowBottom(bgColor, dims.reqWidth, offsetLeft - arrowHeadSize / 2));
+                            $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(
+								styles.arrowBottom(bgColor, dims.reqWidth, offsetLeft - arrowHeadSize / 2, arrowHeadSize)
+							);
                         }
 
                         if (orientation == 'b' || orientation == 'b!') {
@@ -246,7 +258,9 @@ define(["jquery"], function ($) {
                                 $(`#${ownId}_tooltip`).css('bottom', dims.reqHeight)
                             else
                                 $(`#${ownId}_tooltip`).css('top', dims.top + dims.height + arrowHeadSize);
-                            $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(styles.arrowTop(bgColor, dims.reqWidth, offsetLeft - arrowHeadSize / 2));
+                            $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(
+								styles.arrowTop(bgColor, dims.reqWidth, offsetLeft - arrowHeadSize / 2, arrowHeadSize)
+							);
                         }
                     }
                     $(`#${ownId}_tooltip`).show();
@@ -272,70 +286,12 @@ define(["jquery"], function ($) {
         }
     }
 
-    function patternize(hn, d) {
-        return d.indexOf('*') == -1 ? hn
-            : ([
-                hn.substr(0, d.indexOf('*')),
-                d.substr(-1) == '*' ? '' : hn.substr(1 - d.length + d.indexOf('*'))
-            ].join(d.indexOf('*') == -1 ? '' : '*'));
-    }
 
-    function hx(s) {
-        var x = 0;
-        for (var j = 0; j < s.length; j++) {
-            x = ((x << 5) - x) + s.charCodeAt(j)
-            x |= 0;
-        }
-        return Math.abs(x);
-    }
-
-    function hm(h, e) {
-        const o = hx(h);
-        const u = hx(e);
-        var cmap = [];
-        var n;
-        var i;
-        for (n = 0; n < h.length; n++) for (i = 11; i <= 36; i++) if (cmap.length < 0x130)
-            cmap.push((Math.E.toString().substr(2, 8) * h.charCodeAt(n) + o + u).toString(i));
-        return cmap.join('');
-    }
-
-    function isLicensed(h, l, c) {
-        const m = hm(h, ext);
-        const r = l && c && h && (m.substr(Math.sqrt(parseInt(c, 8) - 0x6AC) || 1e6, 7) == (l * 1).toString(36));
-        return r || false;
-    }
 
     return {
 
         play: function (ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed) {
             play(ownId, layout, tooltipNo, reset, enigma, tours, tooltipsCache, licensed);
-        },
-
-        hm: function (h, e) {
-            return hm(h, e);
-        },
-
-        isLicensed: function (h, l, c) {
-            return isLicensed(h, l, c);
-        },
-
-        patternize: function (hn, d) {
-            return patternize(hn, d)
-        },
-
-        chkLicenseJSON: function (lstr) {
-            var r = false;
-            try {
-                const j = JSON.parse(lstr);
-                for (const d in j) {
-                    const h = patternize(location.hostname, d);
-                    const m = hm(h, ext);
-                    r = isLicensed(h, j[d][0], j[d][1])
-                }
-            }
-            catch (err) { };
-            return r;
         },
 
         leonardoMsg: function (ownId, title, detail, ok, cancel, inverse) {
