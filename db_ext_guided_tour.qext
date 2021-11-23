@@ -11,8 +11,8 @@
     "0.9.4": "03-Nov-2021, only scroll when it's necessary, do it smoothly",
     "0.9.5": "09-Nov-2021, Added picker for all objects on sheet",
     "0.9.6": "11-Nov-2021, Adjustable font-size and opacity of inactive objects",
-	"0.9.7": "12-Nov-2021, Single license Json-string",
-	"0.9.8": "12-Nov-2021, Hover-mode for tooltips"
+    "0.9.7": "12-Nov-2021, Single license Json-string",
+    "0.9.8": "23-Nov-2021, Hover-mode for tooltips"
   },
   "author": "Christof Schwarz",
   "homepage": "www.databridge.ch",
