@@ -1,4 +1,4 @@
-define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, functions) {
+define(["qlik", "jquery", "./props", "./functions", "./license"], function (qlik, $, props, functions, license) {
 
     'use strict';
 
@@ -81,18 +81,31 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
             const app = qlik.currApp(this);
             const enigma = app.model.enigmaModel;
             const mode = qlik.navigation.getMode();
+			console.log(ownId, 'paint', layout);
             if (qlik.navigation.getMode() != 'edit') $('.guided-tour-picker').remove();
             const lStorageKey = app.id + '|' + ownId;
             var lStorageVal = JSON.parse(window.localStorage.getItem(lStorageKey) || '{"openedAt":"100000000000"}');
 
             //console.log(ownId, 'layout', layout);
 
-            if (!Object(tours).hasOwnProperty(ownId)) tours[ownId] = -1;
+            if (!Object(tours).hasOwnProperty(ownId)) tours[ownId] = -1;  // initialize in the global tours array this tour. -1 is: not started
+            const switchPosition = $('#' + ownId + '_hovermode').is(':checked') ? 'checked' : '';
 
             $element.html(`
-                <div id="${ownId}_parent" style="height:100%;display:flex;justify-content:center;align-items:center;${layout.pExtensionFontColor.length > 0 ? ('color:' + layout.pExtensionFontColor) : ''}">
-                    <div id="${ownId}_start" style="cursor:pointer; text-align:center;${layout.pMoreStyles}">
-                        <span class="lui-icon  lui-icon--large  lui-icon--play" style="cursor:pointer;${!layout.pShowIcon ? 'display:none;' : ''}" id="${ownId}_play"></span> 
+                <div id="${ownId}_parent" style="height:100%;display:flex;justify-content:center;align-items:center;${layout.pExtensionFontColor.length > 0 ? ('color:' + layout.pExtensionFontColor) : ''}">`
+                + (layout.pLaunchMode == 'hover' ? `
+					<div class="lui-switch" style="margin-right:9px;">
+					  <label class="lui-switch__label">
+						<input type="checkbox" class="lui-switch__checkbox" aria-label="Label" id="${ownId}_hovermode" ${switchPosition} />
+						<span class="lui-switch__wrap">
+						  <span class="lui-switch__inner"></span>
+						  <span class="lui-switch__switch"></span>
+						</span>
+					  </label>
+					</div>
+					`: '') + `
+					<div id="${ownId}_start" style="${layout.pLaunchMode == 'hover' ? '' : 'cursor:pointer;'} text-align:center;${layout.pMoreStyles}">
+                        <span class="lui-icon  lui-icon--large  lui-icon--play" style="${!layout.pShowIcon ? 'display:none;' : ''}" id="${ownId}_play"></span> 
                         ${layout.pTextStart}
                     </div>
                 </div>
@@ -100,10 +113,10 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
 
             $(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor);
 
-            licensedObjs[ownId] = functions.chkLicenseJSON(layout.pLicenseJSON);
+            licensedObjs[ownId] = license.chkLicenseJson(layout.pLicenseJSON, 'db_ext_guided_tour');
             const licensed = licensedObjs[ownId];
 
-            $(`#${ownId}_start`).click(function () {
+            function handleClick(hoverMode, registerOrNot) {
 
                 var otherTourActive = false;
                 for (const tour in tours) {
@@ -113,83 +126,141 @@ define(["qlik", "jquery", "./props", "./functions"], function (qlik, $, props, f
                     }
                 }
                 if (!otherTourActive) {
-                    console.log(ownId, 'Clicked Tour Start');
-                    enigma.evaluate(`Sum({1} $Field='${layout.pTourField}') & Chr(10) & 
-					Sum({1} DISTINCT [${layout.pTourField}]='${layout.pTourSelectVal}') 
-					& Chr(10) & [${layout.pTourField}] 
-					& Chr(10) & TimeStamp(Now(),'YYYYMMDDhhmm')`)
-                        .then((res) => {
-                            const fieldExists = res.split('\n')[0];
-                            const valExists = res.split('\n')[1];
-                            const currVal = res.split('\n')[2];
-                            lStorageVal.openedAt = res.split('\n')[3];;
-                            window.localStorage.setItem(lStorageKey, JSON.stringify(lStorageVal));
-                            console.log(ownId, 'Stored locally ', lStorageKey, JSON.stringify(lStorageVal));
-                            //console.log(ownId, 'fieldExists', fieldExists, 'valExists', valExists, 'currVal', currVal);
+                    console.log(ownId, 'Tour Start');
+                    const askEnigma = [
+                        "Sum({1} $Field='" + layout.pTourField + "')",
+                        "Sum({1} DISTINCT [" + layout.pTourField + "]='" + layout.pTourSelectVal + "')",
+                        "[" + layout.pTourField + "]",
+                        "TimeStamp(Now(),'YYYYMMDDhhmm')"].join(" & CHR(10) & ");
+                    console.log('askEnigma', askEnigma)
+                    enigma.evaluate(askEnigma).then(function (res) {
+                        const fieldExists = res.split('\n')[0];
+                        const valExists = res.split('\n')[1];
+                        const currVal = res.split('\n')[2];
+                        lStorageVal.openedAt = res.split('\n')[3];
 
-                            function getDataAndPlay() {
-                                self.backendApi.getData([{ qTop: 0, qLeft: 0, qWidth: 5, qHeight: 2000 }])
-                                    .then(function (hcube) {
-                                        tooltipsCache[ownId] = hcube[0].qMatrix;
-                                        //console.log(ownId, 'tooltipsCache', tooltipsCache);
-                                        functions.play(ownId, layout, 0, false, enigma, tours, tooltipsCache, licensed)
-                                    })
-                                    .catch((err) => functions.leonardoMsg(ownId, 'backendApi.getData Error', JSON.stringify(err), null, 'OK'));
-                            }
+                        window.localStorage.setItem(lStorageKey, JSON.stringify(lStorageVal));
+                        console.log(ownId, 'Stored locally ', lStorageKey, JSON.stringify(lStorageVal));
+                        //console.log(ownId, 'fieldExists', fieldExists, 'valExists', valExists, 'currVal', currVal);
 
-                            if (layout.pTourField.length > 0 && fieldExists == '0') {
-                                functions.leonardoMsg(ownId, 'Bad config', `No such field "${layout.pTourField}" in data model.`, null, 'OK');
-                            }
-                            else if (layout.pTourField.length > 0 && valExists == '0') {
-                                functions.leonardoMsg(ownId, 'Bad config', `Field "${layout.pTourField}" has no such value "${layout.pTourSelectVal}".`, null, 'OK');
-                            }
-                            else if (currVal == layout.pTourSelectVal) {
-                                // field has already the right selection, just play the tour
-                                //console.log(`Field ${layout.pTourField} has already selection ${layout.pTourSelectVal}`);
-                                getDataAndPlay();
-                            } else {
-                                // make selection then play the tour
-                                enigma.getField(layout.pTourField)
-                                    .then((fld) => {
-                                        fld.select({ qMatch: layout.pTourSelectVal, qSoftLock: false })
-                                            .then((fs) => getDataAndPlay())
-                                            .catch((err) => functions.leonardoMsg(ownId, 'Field Select Error', JSON.stringify(err), null, 'OK'));
-                                    })
-                                    .catch((err) => functions.leonardoMsg(ownId, 'enigma.getField Error', JSON.stringify(err), null, 'OK'));
-                            }
-                        })
-                        .catch((err) => functions.leonardoMsg(ownId, 'enigma.evaluate Error', JSON.stringify(err), null, 'OK'));
+                        function getDataAndPlay() {
+                            self.backendApi.getData([{ qTop: 0, qLeft: 0, qWidth: 5, qHeight: 2000 }])
+                                .then(function (hcube) {
+                                    tooltipsCache[ownId] = hcube[0].qMatrix;
+                                    //console.log(ownId, 'tooltipsCache', tooltipsCache);
+                                    if (hoverMode) {
+                                        //alert('Coming soon...');
+                                        console.log(hcube[0].qMatrix);
+                                        tooltipsCache[ownId].forEach((tooltipDef, tooltipNo) => {
+                                            const divId = tooltipDef[0].qText;
+                                            if (registerOrNot == 'register') {
+                                                $('[tid="' + divId + '"]').on('mouseover', function (elem) {
+                                                    console.log(tooltipNo, tooltipDef[1].qText);
+                                                    if ($('#' + ownId + '_tooltip').length == 0) {  // tooltip is not yet open
+                                                        functions.play(ownId, layout, tooltipNo, false, enigma, tours, tooltipsCache, licensed);
+                                                    }
+                                                });
+                                                $('[tid="' + divId + '"]').on('mouseout', function (elem) {
+                                                    console.log(tooltipNo, 'Closing');
+                                                    $('#' + ownId + '_tooltip').remove();
+                                                });
+                                            } else {
+                                                $('[tid="' + divId + '"]').unbind('mouseover');
+                                                $('[tid="' + divId + '"]').unbind('mouseout');
+                                                enigma.getField(layout.pTourField).then((fld) => {
+                                                    fld.clear()
+                                                });
+                                            }
+                                        })
+
+                                    } else {
+                                        // start tour at 1st tooltip
+                                        functions.play(ownId, layout, 0, false, enigma, tours, tooltipsCache, licensed);
+                                    }
+                                })
+                                .catch((err) => functions.leonardoMsg(ownId, 'backendApi.getData Error', JSON.stringify(err), null, 'OK'));
+                        }
+
+                        if (layout.pTourField.length > 0 && fieldExists == '0') {
+                            functions.leonardoMsg(ownId, 'Bad config', `No such field "${layout.pTourField}" in data model.`, null, 'OK');
+                        }
+                        else if (layout.pTourField.length > 0 && valExists == '0') {
+                            functions.leonardoMsg(ownId, 'Bad config', `Field "${layout.pTourField}" has no such value "${layout.pTourSelectVal}".`, null, 'OK');
+                        }
+                        else if (currVal == layout.pTourSelectVal) {
+                            // field has already the right selection, just play the tour
+                            //console.log(`Field ${layout.pTourField} has already selection ${layout.pTourSelectVal}`);
+                            getDataAndPlay();
+                        } else {
+                            // make selection then play the tour
+                            enigma.getField(layout.pTourField)
+                                .then((fld) => {
+                                    fld.select({ qMatch: layout.pTourSelectVal, qSoftLock: false })
+                                        .then((fs) => getDataAndPlay())
+                                        .catch((err) => functions.leonardoMsg(ownId, 'Field Select Error', JSON.stringify(err), null, 'OK'));
+                                })
+                                .catch((err) => functions.leonardoMsg(ownId, 'enigma.getField Error', JSON.stringify(err), null, 'OK'));
+                        }
+                    })
+                        .catch(function (err) {
+                            functions.leonardoMsg(ownId, 'enigma.evaluate Error', JSON.stringify(err), null, 'OK');
+                            console.log('askEnigma', askEnigma);
+                        });
                 } else {
                     console.log(ownId, 'Button clicked but other tour is active.');
                 }
 
+            }
+
+            $(`#${ownId}_start`).click(function () {
+                console.log(ownId, 'clicked on tour start');
+                if (layout.pLaunchMode != 'hover') {
+					handleClick(false)
+				}
             });
 
-            //console.log('ACTIVE TOURS:', tours);
 
-            if (layout.pAutoLaunch == 'always' && mode == 'analysis' && !visitedTours[ownId]) {
-                if (licensed) {
-                    tours[ownId] = 0; // mark the tour as open on 1st tooltip (index 0)
-                    $(`#${ownId}_start`).trigger('click');  // trigger a click.
-                    visitedTours[ownId] = true;
+            $(`#${ownId}_hovermode`).click(() => {
+                if (!licensed) {
+                    $(`#${ownId}_hovermode`).prop('checked', false);
+                    functions.leonardoMsg(ownId, 'Error', 'You have no license for mouse-over mode, sorry. Get in touch with csw@databridge.ch', null, 'OK')
                 } else {
-                    console.log(ownId, 'Auto-launch of tour supressed because no license');
+                    const hoverModeSwitch = $(`#${ownId}_hovermode`).is(':checked');
+                    if (hoverModeSwitch == true) {
+                        handleClick(true, 'register');
+                    } else {
+                        // unregister events
+                        handleClick(true, 'unregister');
+                        console.log('Unregistering events');
+                    }
                 }
+            })
+
+				
+            if (layout.pLaunchMode == 'auto-always'
+                && mode == 'analysis'
+                && !visitedTours[ownId]) {
+                tours[ownId] = 0; // mark the tour as open on 1st tooltip (index 0)
+                $(`#${ownId}_start`).trigger('click');  // trigger a click.
+                visitedTours[ownId] = true;
             }
 
 
-            var currentTime = await enigma.evaluate("Timestamp(Now(),'YYYYMMDDhhmm')"); // get server time
-            //console.log('localStorage is ', lStorageVal, 'currentTime', currentTime, 'relaunchAfter', layout.pRelaunchAfter);
-
-            if (layout.pAutoLaunch == 'once' && mode == 'analysis'
-                && currentTime >= layout.pRelaunchAfter && layout.pRelaunchAfter > lStorageVal.openedAt) {
-                if (licensed) {
-                    tours[ownId] = 0; // mark the tour as open on 1st tooltip (index 0)
-                    $(`#${ownId}_start`).trigger('click');  // trigger a click.
-                    visitedTours[ownId] = true;
-                } else {
-                    console.log(ownId, 'Auto-launch of tour supressed because no license');
-                }
+            if (layout.pLaunchMode == 'auto-once'
+                && mode == 'analysis') {
+                enigma.evaluate("Timestamp(Now(),'YYYYMMDDhhmm')") // get server time
+                    .then(function (currentTime) {
+                        if (currentTime >= layout.pRelaunchAfter
+                            && layout.pRelaunchAfter > lStorageVal.openedAt) {
+                            if (licensed) {
+                                tours[ownId] = 0; // mark the tour as open on 1st tooltip (index 0)
+                                $(`#${ownId}_start`).trigger('click');  // trigger a click.
+                                visitedTours[ownId] = true;
+                            } else {
+                                console.log(ownId, 'Auto-launch of tour supressed because no license');
+                            }
+                        }
+                    })
             }
 
 
