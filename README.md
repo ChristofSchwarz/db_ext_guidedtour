@@ -28,6 +28,21 @@ If you don't want different attributes per tooltip, but all to look the same, ju
 
 The extension also allows to configure the texts for "Start Tour", "Next" and "Done" links.
 
+## Mode of Guided Tour
+
+There are 4 modes of operation (some are premium feature and need a license)
+ * Click to start (standard)
+ * Mouse-over mode (premium) 
+ * Auto-launch always (standard)
+ * Auto-launch once (premium)
+
+The **Auto-launch once** will open a tour (in Analysis mode) once per user (per browser, to be precise, because it remembers that the tour started in the local
+browser storage). The extension compares the last tour visit of the user with a cutoff date set by the application. If that date at a later point of time
+is newer than the last visit, the tour will restart again. That way you can present "What's new" easily.
+
+The **Mouse-over mode** adds a switch icon into the tour button, when it is turned on, the respective tooltip shows when the user moves the mouse over the object
+that the tooltip belongs to. The mouseover events can be disabled (unregistered) by turning the same switch off again. 
+
 ## Click on the Sense objects to create a tour
 
 New as of 10-Nov-2021 is the button "Select Objects for tour" in the Extension Settings (accordeon menu on the right). When you click this, every object
