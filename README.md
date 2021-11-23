@@ -36,7 +36,7 @@ There are 4 modes of operation (some are premium feature and need a license)
  * Auto-launch always (standard)
  * Auto-launch once (premium)
 
-The **Auto-launch once** will open a tour (in Analysis mode) once per user (per browser, to be precise, because it remembers that the tour started in the local
+The **Auto-launch once** will open a tour (in Analysis mode) once per user (actually, per browser, because it remembers that the tour started in the local
 browser storage). The extension compares the last tour visit of the user with a cutoff date set by the application. If that date at a later point of time
 is newer than the last visit, the tour will restart again. That way you can present "What's new" easily.
 
