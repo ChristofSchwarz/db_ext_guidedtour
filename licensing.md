@@ -22,3 +22,4 @@ SET vGuidedTourLicense = {"*.databridge.ch":[13728457009,6725660]};
 <img src="./pics/licensing(1).png" width="450">
 </p>
 
+PS the license is checked offline within the extension itself, no need to even have internet connection from the client.
