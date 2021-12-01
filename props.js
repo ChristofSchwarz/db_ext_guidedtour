@@ -299,19 +299,19 @@ define(["jquery", "./functions", "./license"], function ($, functions, license) 
                         ref: 'pRelaunchAfter',
                         defaultValue: '189912312359',
                         expression: 'optional',
-                        show: function (arg) { return arg.pLaunchMode == 'once' }
+                        show: function (arg) { return arg.pLaunchMode == 'auto-once' }
                     }, {
                         label: "Format: YYYYMMDDhhmm",
                         component: "text",
-                        show: function (arg) { return arg.pLaunchMode == 'once' }
+                        show: function (arg) { return arg.pLaunchMode == 'auto-once' }
                     }, {
                         label: function (arg) { return 'Saved settings: ' + window.localStorage.getItem(app.id + '|' + arg.qInfo.qId) },
                         component: "text",
-                        show: function (arg) { return arg.pLaunchMode == 'once' }
+                        show: function (arg) { return arg.pLaunchMode == 'auto-once' }
                     }, {
                         label: "Clear saved settings",
                         component: "button",
-						show: function (arg) { return arg.pLaunchMode == 'once' },
+                        show: function (arg) { return arg.pLaunchMode == 'auto-once' },
                         action: function (arg) {
                             window.localStorage.removeItem(app.id + '|' + arg.qInfo.qId);
                             functions.leonardoMsg(arg.qInfo.qId, 'Success', 'Removed local item', null, 'OK');
