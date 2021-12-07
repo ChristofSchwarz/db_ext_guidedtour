@@ -1,13 +1,10 @@
 // props.js: Extension properties (accordeon menu) externalized
 
-define(["jquery", "./functions", "./license"], function ($, functions, license) {
+define(["jquery", "./functions", "./license", "./picker"], function ($, functions, license, picker) {
 
-    var pickList = [];
-    var pickList2 = [];
     const ext = 'db_ext_guided_tour';
-    const bgColorPickers = '#079B4A';
 
-    function subSection(labelText, itemsArray) {
+    function subSection(labelText, itemsArray, argKey, argVal) {
         var ret = {
             component: 'expandable-items',
             items: {}
@@ -20,20 +17,23 @@ define(["jquery", "./functions", "./license"], function ($, functions, license) 
         ret.items[hash] = {
             label: labelText,
             type: 'items',
+			show: function(arg){ return (argKey && argVal) ? (arg[argKey] == argVal) : true },
             items: itemsArray
         };
         return ret;
     }
 
-    function getDimNames(props) {
+    function getDimNames(props, indexOrLabel) {
         // returns the labels/field names of the Dimension in this qHyperCubeDef as an array of {value: #, label: ""}
         var opt = [{ value: "", label: "- not assigned -" }];
         var i = -1;
         for (const dim of props.qHyperCubeDef.qDimensions) {
             i++;
+			var label = dim.qDef.qFieldLabels[0].length == 0 ? dim.qDef.qFieldDefs[0] : dim.qDef.qFieldLabels[0];
+			if (label.substr(0,1) == '=') label = label.substr(1);
             if (i >= 2) opt.push({  // skip the first 2 dimensions
-                value: i,
-                label: dim.qDef.qFieldLabels[0].length == 0 ? dim.qDef.qFieldDefs[0] : dim.qDef.qFieldLabels[0]
+                value: indexOrLabel == 'label' ? label : i,
+                label: label
             });
         }
         return opt;
@@ -67,15 +67,6 @@ define(["jquery", "./functions", "./license"], function ($, functions, license) 
             const enigma = app.model.enigmaModel;
             return [
                 {
-                    label: "WARNING: The sort order is not the load order! Tour items may show in different sequence.",
-                    component: "text",
-                    show: function (arg) { return checkSortOrder(arg); }
-                }, {
-                    label: "See how to fix it",
-                    component: "link",
-                    url: '../extensions/db_ext_guided_tour/correctsortorder.html',
-                    show: function (arg) { return checkSortOrder(arg); }
-                }, {
                     label: "The first two dimensions are mandatory: object-id and text",
                     component: "text"
                 }, {
@@ -91,97 +82,31 @@ define(["jquery", "./functions", "./license"], function ($, functions, license) 
                         value: "hover",
                         label: "Move mouse over objects \u2605"
                     }, {
-                        value: "auto-once",
-                        label: "Auto-launch once \u2605"
-                    }, {
                         value: "auto-always",
-                        label: "Auto-launch always"
+                        label: "Auto-launch tour (always)"
+                    }, {
+                        value: "auto-once",
+                        label: "Auto-launch tour once \u2605"
+                    }, {
+                        value: "auto-once-p-obj",
+                        label: "Auto-launch tooltips once \u2605"
                     }]
                 }, {
                     label: "Note: Mouse-over mode only supports Sense object IDs, no other CSS-selectors.",
                     component: "text",
 					show: function(arg) { return arg.pLaunchMode == 'hover' }
-                },{
+                }, {
+					label: "\u26a0 You have to specify a timestamp field in the auto-launch settings",
+					component: "text",
+					show: function(arg) { return arg.pLaunchMode == 'auto-once-p-obj' && arg.pTimestampFromDim.length == 0 }
+				}, {
                     label: "\u2605 Premium feature only with license",
                     component: "text"
                 }, {
                     label: "Select objects for tour",
                     component: "button",
                     action: function (arg) {
-                        const ownId = arg.qInfo.qId;
-                        $('.guided-tour-picker').remove(); // remove previous divs
-                        $('.cell').not(`[tid="${arg.qInfo.qId}"]`).find('.qv-inner-object')  // add divs overlaying every Sense object
-                            .prepend(`<div style="position:absolute; z-index:100; background-color:${bgColorPickers}; 
-                            cursor:pointer; color:white; border-radius: 10px; padding: 0 10px;" 
-                            class="guided-tour-picker">PICK</div>`);
-
-                        $('.guided-tour-picker').click(function (me) {
-                            var parent = me.currentTarget;
-                            // go up the parents tree until the level where the class contains 'cell'
-                            var i = 0;
-                            while (!parent.classList.contains('cell') && i < 6) {
-                                i++;
-                                parent = parent.parentElement;
-                            }
-
-                            if (parent.classList.contains('cell') && parent.attributes.hasOwnProperty('tid')) {
-                                var objId = parent.attributes["tid"].value;
-                                console.log(ownId, 'Picked object Id ' + objId);
-                                pickList.push(objId);
-                                pickList2.push(objId);
-                                enigma.getObject(objId).then(function (obj) {
-                                    //get more info about the object (type and title)
-                                    pickList[pickList.length - 1] += `,"${obj.layout.visualization} ${obj.layout.title}"`;
-                                });
-                                // highlight for some milliseconds the currently clicked picker and the DONE picker
-                                $(`[tid="${objId}"] .guided-tour-picker`).css('background-color', 'orange');
-                                $(`[tid="${ownId}"] .guided-tour-picker`).css('background-color', 'orange');
-                                $(`[tid="${ownId}"] .guided-tour-picks`).html('(' + pickList.length + ')');
-                                setTimeout(function () {
-                                    $(`[tid="${objId}"] .guided-tour-picker`).css('background-color', bgColorPickers);
-                                    setTimeout(function () {
-                                        $(`[tid="${ownId}"] .guided-tour-picker`).css('background-color', bgColorPickers);
-                                    }, 400);
-                                }, 400);
-
-                            } else {
-                                console.error('Object Id not found while going ' + i + ' parent levels up', parent);
-                            }
-
-                        })
-
-                        $(`[tid="${ownId}"] .qv-inner-object`)  // the current extension object gets different onclick event
-                            .prepend(`<div style="position:absolute; z-index:100; background-color:${bgColorPickers}; 
-                            cursor:pointer; color:white; border-radius: 10px; padding: 0 10px;" 
-                            class="guided-tour-picker">DONE <span class="guided-tour-picks"></span></div>`);
-
-                        $(`[tid="${ownId}"] .guided-tour-picker`).click(function (me) {
-                            console.log('Those are the objectIds you picked:');
-                            console.log(pickList.join('\n'));
-                            functions.leonardoMsg(ownId, 'Picked Objects',
-                                `<label class="lui-radiobutton">
-                                    <input class="lui-radiobutton__input" type="radio" name="${ownId}_cb" checked id="${ownId}_opt1">
-                                    <div class="lui-radiobutton__radio-wrap">
-                                    <span class="lui-radiobutton__radio"></span>
-                                    <span class="lui-radiobutton__radio-text">Object IDs and type/title</span>
-                                    </div>
-                                </label>
-                                <label class="lui-radiobutton">
-                                    <input class="lui-radiobutton__input" type="radio" name="${ownId}_cb" id="${ownId}_opt2">
-                                    <div class="lui-radiobutton__radio-wrap">
-                                    <span class="lui-radiobutton__radio"></span>
-                                    <span class="lui-radiobutton__radio-text">Just object IDs</span>
-                                    </div>
-                                </label>
-                                <textarea class="lui-textarea" style="height:140px;font-size:11pt;margin:10px 0;" id="${ownId}_textarea">${pickList.join('\n')}</textarea>
-                                <button class="lui-button" onclick="document.getElementById('${ownId}_textarea').select();document.execCommand('copy');">Copy to clipboard</button>`,
-                                'Close', null, false);
-                            $(`#${ownId}_opt1`).click(function () { $(`#${ownId}_textarea`).html(pickList.join('\n')); });
-                            $(`#${ownId}_opt2`).click(function () { $(`#${ownId}_textarea`).html(pickList2.join('\n')); });
-                            $(`#msgok_${ownId}`).click(function () { $(`#msgparent_${ownId}`).remove(); pickList = []; pickList2 = []; });
-                            $('.guided-tour-picker').remove();
-                        })
-
+						picker.pick(arg, enigma);
                     }
                 }, subSection('Select A Specific Tour', [
                     {
@@ -205,7 +130,7 @@ define(["jquery", "./functions", "./license"], function ($, functions, license) 
                         ref: 'pTextStart',
                         defaultValue: 'Start Tour',
                         expression: 'optional'
-                    }, {
+                    }, /*{
                         label: "Mouse-Over Mode \u2605",
                         type: "boolean",
                         component: "switch",
@@ -219,21 +144,21 @@ define(["jquery", "./functions", "./license"], function ($, functions, license) 
                             value: false,
                             translation: "Off - Sequential Tour"
                         }
-                    }, {
+                    },*/ {
                         type: "boolean",
                         defaultValue: true,
                         ref: "pShowIcon",
                         label: "Show play icon",
-                        show: function (arg) { return !arg.pHoverMode }
-                    }, {
-                        label: 'Background-color of button',
-                        type: 'string',
-                        ref: 'pExtensionBgColor',
-                        expression: 'optional'
+                        show: function (arg) { return arg.pLaunchMode != 'hover' }
                     }, {
                         label: 'Font-color of button',
                         type: 'string',
                         ref: 'pExtensionFontColor',
+                        expression: 'optional'
+                    }, {
+                        label: 'Background-color of button',
+                        type: 'string',
+                        ref: 'pExtensionBgColor',
                         expression: 'optional'
                     }, {
                         label: 'More styling',
@@ -256,27 +181,21 @@ define(["jquery", "./functions", "./license"], function ($, functions, license) 
                         defaultValue: 'Done',
                         expression: 'optional'
                     }, {
-                        label: 'Default tooltip backgr-color',
-                        type: 'string',
-                        ref: 'pBgColor',
-                        defaultValue: 'rgba(0,0,0,0.9)',
-                        expression: 'optional'
-                    }, {
-                        label: 'Dynamic backgr-color from dim',
-                        component: "dropdown",
-                        ref: "pBgColorFromDim",
-                        defaultValue: "",
-                        options: function (arg) { return getDimNames(arg); }
-                    }, {
                         label: 'Default tooltip font color',
                         type: 'string',
                         ref: 'pFontColor',
                         defaultValue: '#e0e0e0',
                         expression: 'optional'
                     }, {
-                        label: 'Dynamic font-color from dim',
+                        label: 'Default tooltip backgr-color',
+                        type: 'string',
+                        ref: 'pBgColor',
+                        defaultValue: 'rgba(0,0,0,0.9)',
+                        expression: 'optional'
+                    }, {
+                        label: 'More attributes in dimension',
                         component: "dropdown",
-                        ref: "pFontColorFromDim",
+                        ref: "pAttrFromDim",
                         defaultValue: "",
                         options: function (arg) { return getDimNames(arg); }
                     }, {
@@ -289,35 +208,57 @@ define(["jquery", "./functions", "./license"], function ($, functions, license) 
 						step: 4,
 						defaultValue: 16
 					}
-                ]), subSection('Auto-launch Settings \u2605', [
+                ]), subSection('Auto-launch Settings (Tour)\u2605', [
                     {
-                        label: "These settings apply only if you have a licensed version and the mode is 'Auto-lauch once'.",
+                        label: "These settings apply only if you have a licensed version.",
                         component: "text"
                     }, {
                         label: 'Relaunch once after',
                         type: 'string',
                         ref: 'pRelaunchAfter',
-                        defaultValue: '189912312359',
-                        expression: 'optional',
-                        show: function (arg) { return arg.pLaunchMode == 'auto-once' }
+                        defaultValue: '18991231235959',
+                        expression: 'optional'
                     }, {
-                        label: "Format: YYYYMMDDhhmm",
-                        component: "text",
-                        show: function (arg) { return arg.pLaunchMode == 'auto-once' }
+                        label: "Format: YYYYMMDDhhmmss",
+                        component: "text"
                     }, {
                         label: function (arg) { return 'Saved settings: ' + window.localStorage.getItem(app.id + '|' + arg.qInfo.qId) },
-                        component: "text",
-                        show: function (arg) { return arg.pLaunchMode == 'auto-once' }
+                        component: "text"
                     }, {
                         label: "Clear saved settings",
                         component: "button",
-                        show: function (arg) { return arg.pLaunchMode == 'auto-once' },
                         action: function (arg) {
                             window.localStorage.removeItem(app.id + '|' + arg.qInfo.qId);
-                            functions.leonardoMsg(arg.qInfo.qId, 'Success', 'Removed local item', null, 'OK');
+							functions.leonardoMsg(arg.qInfo.qId, 'Success', 'Removed local item', null, 'OK');
                         }
                     }
-                ]), subSection('Advanced Settings', [
+                ], 'pLaunchMode', 'auto-once'  // only show settings section if pLaunchMode == 'auto-once'
+				),  subSection('Auto-launch Settings (Obj)\u2605', [
+                    {
+                        label: "These settings apply only if you have a licensed version.",
+                        component: "text"
+                    }, {
+                        label: 'Timestamp field for every object',
+                        component: "dropdown",
+                        ref: "pTimestampFromDim",
+                        defaultValue: "",
+                        options: function (arg) { return getDimNames(arg, 'label'); }
+                    }, {
+                        label: "Format: YYYYMMDDhhmmss",
+                        component: "text"
+                    }, {
+                        label: function (arg) { return 'Saved settings: ' + window.localStorage.getItem(app.id + '|' + arg.qInfo.qId) },
+                        component: "text"
+                    }, {
+                        label: "Clear saved settings",
+                        component: "button",
+                        action: function (arg) {
+                            window.localStorage.removeItem(app.id + '|' + arg.qInfo.qId);
+							functions.leonardoMsg(arg.qInfo.qId, 'Success', 'Removed local item', null, 'OK');
+                        }
+                    }
+                ], 'pLaunchMode', 'auto-once-p-obj'  // only show settings section if pLaunchMode == 'auto-once-p-obj'
+				), subSection('Advanced Settings', [
                     {
                         label: 'Font Size',
                         type: 'string',
@@ -337,14 +278,15 @@ define(["jquery", "./functions", "./license"], function ($, functions, license) 
                         defaultValue: "",
                         options: function (arg) { return getDimNames(arg); }
                     }, {
-                        label: 'Opacity of inactive objects',
+                        label: function(arg) { return 'Opacity of inactive objects: ' + arg.pOpacity  },
                         type: 'number',
                         ref: 'pOpacity',
                         component: "slider",
                         defaultValue: 0.1,
                         min: 0.1,
                         max: 1,
-                        step: 0.1
+                        step: 0.1,
+						show: function(arg) { return arg.pLaunchMode != 'hover' }
                     }, {
                         label: 'Offset when top (px)',
                         type: 'number',
@@ -364,7 +306,12 @@ define(["jquery", "./functions", "./license"], function ($, functions, license) 
                         defaultValue: '#qv-page-container',
                         expression: 'optional'
                     }*/
-                ])
+                ]), {
+                    type: "boolean",
+                    defaultValue: false,
+                    ref: "pConsoleLog",
+                    label: "console.log debugging info"
+                }
             ]
         },
 
