@@ -22,7 +22,7 @@ the page or comes back another time, the tour will auto-start again.
 
 Note: you can also start the tour by hand with a click on the tour object.
 
-### Auto-launch tour once (premium)
+### Auto-launch tour once
 requires a license
 
 This mode will open a tour (in Analysis mode) once per user (actually, per browser, because it remembers that the tour started in the local
@@ -34,7 +34,7 @@ You have to use a cutoff-date in form of a variable
 
 Note: you can also start the entire tour with a click on the tour object and the manual start of the tour is not recorded to the local storage
 
-### Auto-launch tooltips once (premium)
+### Auto-launch tooltips once
 requires a license
 
 Similar like Auto-launch tour once this mode shows a tooltip only once, but every tooltip's open-time is recorded separately in the local browser's storage. 
