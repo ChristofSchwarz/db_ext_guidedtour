@@ -30,7 +30,7 @@ Client page. You may want to use the browser's development tools (F12) for that 
 
 ### Choose the mode of operation
 
-If it is the first time, go the default "Click to run tour"
+If it is the first time, go for the default "Click to run tour". That is license-free and simply runs the tooltips from the first to the last.
 
 There are 4 more modes (some are premium features and need a license) with advanced behaviours
  * [Move mouse over objects](./docs/operation-modes.md#move-mouse-over-objects) (premium) 
