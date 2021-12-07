@@ -78,7 +78,7 @@ variable. E.g. the 2nd dimension is `=tooltip.$(vLanguage)` and the variable `vL
 
 The licensed version gives you support, removes the ad ("sponsored by data/\bridge") at the end of a tour, and enables the advanced modes. 
 
-Read more [here](licensing.md)
+Read more [here](./docs/licensing.md)
 
 ## Known limitations
 
