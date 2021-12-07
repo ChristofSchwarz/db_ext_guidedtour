@@ -1,99 +1,164 @@
-define(["qlik", "jquery", "./props", "./functions", "./license"], function (qlik, $, props, functions, license) {
+define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./license"],
+	function (qlik, $, cssContent, props, functions, license) {
 
-    'use strict';
+		'use strict';
 
-    var tours = {};  // global variable to remember all active tours 
-    // it contains later one entry per extension and the number it shows is the active tooltip (0..n) or -1 if no tooltip is open
-    var tooltipsCache = {};
-    var licensedObjs = {};
-    var visitedTours = {};
-    var qext;
+		var guided_tour_global = {
+			qext: {}, // extension meta-information
+			hashmap: license.hashmap(location.hostname, 'db_ext_guided_tour'), // hash map for the license check
+			activeTooltip: {},  // remember all active tours, contains later one entry per extension and the 
+			// an integer shows the active tooltip (0..n) or -2 if tour is inactive, -1 (in hover-mode) if armed
+			visitedTours: {},  // all extension-ids which will be started, are added to this object
+			licensedObjs: {}, // list of all extension-ids which have a license
+			tooltipsCache: {}, // the qHypercube result of each tour will be put here under the key of the objectId when started 
+			noLicenseWarning: {} // in order not to suppress repeating license warnings , every extension id is added here once the warning was shown
+		}
+		const lStorageDefault = '{"openedAt":"18991231000000", "objectsOpened": {}}';
+		function noLicenseMsg(mode) {
+			return `The ${mode} mode would start now, if you had a license for the guided-tour extension.
+				<br/><br/>Get in touch with <a href="mailto:insight-sales@databridge.ch">insight-sales@databridge.ch</a> '
+				or choose a license-free mode of operation.`
+		};
 
-    $.ajax({
-        url: '../extensions/db_ext_guided_tour/db_ext_guided_tour.qext',
-        dataType: 'json',
-        async: false,  // wait for this call to finish.
-        success: function (data) { qext = data; }
-    });
+		$("<style>").html(cssContent).appendTo("head");
 
-    return {
-        initialProperties: {
-            showTitles: false,
-            disableNavMenu: true,
-            qHyperCubeDef: {
-                qDimensions: []
-            }
-        },
+		$.ajax({
+			url: '../extensions/db_ext_guided_tour/db_ext_guided_tour.qext',
+			dataType: 'json',
+			async: false,  // wait for this call to finish.
+			success: function (data) { guided_tour_global.qext = data; }
+		});
 
-        definition: {
-            type: "items",
-            component: "accordion",
-            items: [
-                {
-                    uses: "dimensions",
-                    min: 2,
-                    max: 5
-                }, {
-                    uses: "sorting"
-                }, {
-                    uses: "settings"
-                }, {
-                    label: 'Extension Settings',
-                    type: 'items',
-                    items: props.presentation(qlik.currApp(this))
-                }, {
-                    label: 'License',
-                    type: 'items',
-                    items: props.licensing(qlik.currApp(this))
-                }, {
-                    label: 'About this extension',
-                    type: 'items',
-                    items: props.about(qext)
-                }
-            ]
-        },
-        snapshot: {
-            canTakeSnapshot: false
-        },
+		function getActiveTour(ownId, currSheet) {
+			// returns the tour id which is currently active, or false if no tour is active
+			var activeTour = false;
+			for (const sheetId in guided_tour_global.activeTooltip) {
+				for (const tourId in guided_tour_global.activeTooltip[sheetId]) {
+					if (guided_tour_global.activeTooltip[sheetId][tourId] > -2) {
+						if (tourId == ownId) {
+							// console.log(ownId, `This tour is already active.`);
+						} else {
+							if (layout.pConsoleLog) console.log(ownId, `other tour ${tourId} is already active.`);
+						}
+						activeTour = tourId;
+					}
+				}
+			}
+			return activeTour;
+		}
+		
+		function closeOtherTourObj(ownId, currSheet) {
+			for (const sheetId in guided_tour_global.activeTooltip) {
+				for (const tourId in guided_tour_global.activeTooltip[sheetId]) {
+					if (sheetId != currSheet) {
+						$(`#${tourId}_tooltip`).remove(); // close tooltips from other sheets found open
+						guided_tour_global.activeTooltip[sheetId][tourId] = -2;
+					} else {
+								
+					}
+				}
+			}
+		}
 
-        resize: function ($element, layout) {
+		return {
+			initialProperties: {
+				showTitles: false,
+				disableNavMenu: true,
+				qHyperCubeDef: {
+					qDimensions: []
+				}
+			},
 
-            const ownId = this.options.id;
-            const app = qlik.currApp(this);
-            console.log('app', app);
-            const enigma = app.model.enigmaModel
-            const licensed = licensedObjs[ownId];
-            const mode = qlik.navigation.getMode();
-            if (mode != 'edit') $('.guided-tour-picker').remove();
+			definition: {
+				type: "items",
+				component: "accordion",
+				items: [
+					{
+						uses: "dimensions",
+						min: 2,
+						max: 5
+					}, /*{
+                    uses: "sorting"  // no more needed. 
+                },*/ {
+						uses: "settings"
+					}, {
+						label: 'Extension Settings',
+						type: 'items',
+						items: props.presentation(qlik.currApp(this))
+					}, {
+						label: 'License',
+						type: 'items',
+						items: props.licensing(qlik.currApp(this))
+					}, {
+						label: 'About this extension',
+						type: 'items',
+						items: props.about(guided_tour_global.qext)
+					}
+				]
+			},
+			snapshot: {
+				canTakeSnapshot: false
+			},
 
-            // is a tour currently ongoing?
-            if (Object(tours).hasOwnProperty(ownId) && tours[ownId] > -1) {
-                // console.log('resize', tours);
-                functions.play(ownId, layout, tours[ownId], false, enigma, tours, tooltipsCache, licensed)
-            }
-            return qlik.Promise.resolve();
-        },
+			resize: function ($element, layout) {
 
-        paint: async function ($element, layout) {
+				const ownId = this.options.id;
+				const app = qlik.currApp(this);
+				const enigma = app.model.enigmaModel
+				const licensed = guided_tour_global.licensedObjs[ownId];
+				const mode = qlik.navigation.getMode();
+				const rootContainer = '#qv-page-container'; /*layout.pParentContainer */
 
-            var self = this;
-            const ownId = this.options.id;
-            const app = qlik.currApp(this);
-            const enigma = app.model.enigmaModel;
-            const mode = qlik.navigation.getMode();
-			console.log(ownId, 'paint', layout);
-            if (qlik.navigation.getMode() != 'edit') $('.guided-tour-picker').remove();
-            const lStorageKey = app.id + '|' + ownId;
-            var lStorageVal = JSON.parse(window.localStorage.getItem(lStorageKey) || '{"openedAt":"100000000000"}');
+				if (mode != 'edit') $('.guided-tour-picker').remove();
+				if (layout.pConsoleLog) console.log(ownId, 'resize', layout, guided_tour_global);
 
-            //console.log(ownId, 'layout', layout);
+				// if a tooltip is open, reposition it
 
-            if (!Object(tours).hasOwnProperty(ownId)) tours[ownId] = -1;  // initialize in the global tours array this tour. -1 is: not started
-            const switchPosition = $('#' + ownId + '_hovermode').is(':checked') ? 'checked' : '';
+				if ($(`#${ownId}_tooltip`).length > 0) {
+					// get the target-selector from a html comment inside the tooltip
+					const oldSelector = $(`#${ownId}_tooltip`).html().split('-->')[0].split('<!--')[1] || '';
+					const newPos = functions.findPositions2(oldSelector, rootContainer, `#${ownId}_tooltip`
+						, layout, $(`#${ownId}_tooltip`).css('background-color'));
+					//console.log(newPos[0],newPos[1],newPos[2]);	
+					$(`#${ownId}_tooltip`)
+						.css(newPos[0][0], newPos[0][1])
+						.css(newPos[1][0], newPos[1][1]);
+					$('.guided-tour-arrowhead').remove(); // the arrowhead may have changed toother edge; remove the old
+					if (newPos[2]) $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(newPos[2]);
+				}
+				
+				return qlik.Promise.resolve();
+			},
 
-            $element.html(`
+			paint: function ($element, layout) {
+
+				var self = this;
+				const ownId = this.options.id;
+				const app = qlik.currApp(this);
+				const enigma = app.model.enigmaModel;
+				const currSheet = qlik.navigation.getCurrentSheetId().sheetId;
+				const mode = qlik.navigation.getMode();
+				if (layout.pConsoleLog) console.log(ownId, 'paint', layout, guided_tour_global);
+				if (qlik.navigation.getMode() != 'edit') $('.guided-tour-picker').remove();
+				const lStorageKey = app.id + '|' + ownId;
+				const objFieldName = layout.qHyperCube.qDimensionInfo[0] ? layout.qHyperCube.qDimensionInfo[0].qGroupFieldDefs[0].replace('=', '') : null;
+
+				//console.log(ownId, 'layout', layout);
+				// add sheet to activeTooltip object
+				if (!Object(guided_tour_global.activeTooltip).hasOwnProperty(currSheet)) {
+					guided_tour_global.activeTooltip[currSheet] = {};
+				}
+				// add this extension id to activeTooltip object
+				if (!Object(guided_tour_global.activeTooltip[currSheet]).hasOwnProperty(ownId)) {
+					guided_tour_global.activeTooltip[currSheet][ownId] = -2;  // initialize in the global guided_tour_global.activeTooltip array this tour. -2 is: not started
+				}
+				closeOtherTourObj();
+				// console.log(guided_tour_global.activeTooltip);
+				const switchPosition = $('#' + ownId + '_hovermode').is(':checked') ? 'checked' : '';
+
+				$element.html(`
                 <div id="${ownId}_parent" style="height:100%;display:flex;justify-content:center;align-items:center;${layout.pExtensionFontColor.length > 0 ? ('color:' + layout.pExtensionFontColor) : ''}">`
-                + (layout.pLaunchMode == 'hover' ? `
+					+ (layout.pLaunchMode == 'hover' ? `
 					<div class="lui-switch" style="margin-right:9px;">
 					  <label class="lui-switch__label">
 						<input type="checkbox" class="lui-switch__checkbox" aria-label="Label" id="${ownId}_hovermode" ${switchPosition} />
@@ -105,167 +170,202 @@ define(["qlik", "jquery", "./props", "./functions", "./license"], function (qlik
 					</div>
 					`: '') + `
 					<div id="${ownId}_start" style="${layout.pLaunchMode == 'hover' ? '' : 'cursor:pointer;'} text-align:center;${layout.pMoreStyles}">
-                        <span class="lui-icon  lui-icon--large  lui-icon--play" style="${!layout.pShowIcon ? 'display:none;' : ''}" id="${ownId}_play"></span> 
+                        <span class="lui-icon  lui-icon--large  ${getActiveTour() == ownId ? 'lui-icon--reload  guided-tour-rotate' : 'lui-icon--play'}" style="${!layout.pShowIcon ? 'display:none;' : ''}" id="${ownId}_play"></span> 
                         ${layout.pTextStart}
                     </div>
+					<!--div id="${ownId}_test" style="${layout.pLaunchMode == 'hover' ? '' : 'cursor:pointer;'} text-align:center;${layout.pMoreStyles}">
+                        TEST
+                    </div-->
+					
                 </div>
             `);
 
-            $(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor);
+				$(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor);
 
-            licensedObjs[ownId] = license.chkLicenseJson(layout.pLicenseJSON, 'db_ext_guided_tour');
-            const licensed = licensedObjs[ownId];
+				guided_tour_global.licensedObjs[ownId] = license.chkLicenseJson(layout.pLicenseJSON, 'db_ext_guided_tour');
+				const licensed = guided_tour_global.licensedObjs[ownId];
 
-            function handleClick(hoverMode, registerOrNot) {
+				//    ---------------------------------------------------
+				if (layout.pLaunchMode == 'click') {
+					//---------------------------------------------------
+					// Standard-Mode ... plays entire tour on click, no auto-launch nor mouse-over
 
-                var otherTourActive = false;
-                for (const tour in tours) {
-                    //console.log('tour',tour,tour==ownId,'active',tours[tour] > -1);
-                    if (tour != ownId && tours[tour] > -1) {
-                        otherTourActive = true;
-                    }
-                }
-                if (!otherTourActive) {
-                    console.log(ownId, 'Tour Start');
-                    const askEnigma = [
-                        "Sum({1} $Field='" + layout.pTourField + "')",
-                        "Sum({1} DISTINCT [" + layout.pTourField + "]='" + layout.pTourSelectVal + "')",
-                        "[" + layout.pTourField + "]",
-                        "TimeStamp(Now(),'YYYYMMDDhhmm')"].join(" & CHR(10) & ");
-                    console.log('askEnigma', askEnigma)
-                    enigma.evaluate(askEnigma).then(function (res) {
-                        const fieldExists = res.split('\n')[0];
-                        const valExists = res.split('\n')[1];
-                        const currVal = res.split('\n')[2];
-                        lStorageVal.openedAt = res.split('\n')[3];
+					$(`#${ownId}_start`).click(function () {
+						if (!getActiveTour()) {
+							functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
+								.then(function (hcube) {
+									guided_tour_global.tooltipsCache[ownId] = hcube;
+									functions.play2(ownId, layout, 0, false, enigma, guided_tour_global, currSheet);
+								})
+								.catch(function () { });
+						}
+					})
+					//---------------------------------------------------
+				} else if (layout.pLaunchMode == 'hover') {
+					//---------------------------------------------------
 
-                        window.localStorage.setItem(lStorageKey, JSON.stringify(lStorageVal));
-                        console.log(ownId, 'Stored locally ', lStorageKey, JSON.stringify(lStorageVal));
-                        //console.log(ownId, 'fieldExists', fieldExists, 'valExists', valExists, 'currVal', currVal);
+					$(`#${ownId}_hovermode`).click(function () {
+						if (!licensed) {
+							$(`#${ownId}_hovermode`).prop('checked', false);
+							functions.leonardoMsg(ownId, 'Guided-Tour Extension', noLicenseMsg('Mouse-over'), null, 'OK');
+						} else {
+							const hoverModeSwitch = $(`#${ownId}_hovermode`).is(':checked');
+							if (hoverModeSwitch == true) {
+								// switch to "on"
+								functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
+									.then(function (hcube) {
+										guided_tour_global.tooltipsCache[ownId] = hcube;
+										guided_tour_global.tooltipsCache[ownId].forEach((tooltipDef, tooltipNo) => {
+											const divId = tooltipDef[0].qText;
+											$('[tid="' + divId + '"]').on('mouseover', function (elem) {
+												// console.log(tooltipNo, tooltipDef[1].qText);
+												if ($('#' + ownId + '_tooltip').length == 0) {  // tooltip is not yet open
+													functions.play2(ownId, layout, tooltipNo, false, enigma, guided_tour_global, currSheet);
+												}
+											});
+											$('[tid="' + divId + '"]').on('mouseout', function (elem) {
+												// console.log(tooltipNo, 'Closing');
+												$('#' + ownId + '_tooltip').remove();
+											});
+										});
+										guided_tour_global.activeTooltip[currSheet][ownId] = -1; // set tour to "armed" 
+									})
+									.catch(function () { });
 
-                        function getDataAndPlay() {
-                            self.backendApi.getData([{ qTop: 0, qLeft: 0, qWidth: 5, qHeight: 2000 }])
-                                .then(function (hcube) {
-                                    tooltipsCache[ownId] = hcube[0].qMatrix;
-                                    //console.log(ownId, 'tooltipsCache', tooltipsCache);
-                                    if (hoverMode) {
-                                        //alert('Coming soon...');
-                                        console.log(hcube[0].qMatrix);
-                                        tooltipsCache[ownId].forEach((tooltipDef, tooltipNo) => {
-                                            const divId = tooltipDef[0].qText;
-                                            if (registerOrNot == 'register') {
-                                                $('[tid="' + divId + '"]').on('mouseover', function (elem) {
-                                                    console.log(tooltipNo, tooltipDef[1].qText);
-                                                    if ($('#' + ownId + '_tooltip').length == 0) {  // tooltip is not yet open
-                                                        functions.play(ownId, layout, tooltipNo, false, enigma, tours, tooltipsCache, licensed);
-                                                    }
-                                                });
-                                                $('[tid="' + divId + '"]').on('mouseout', function (elem) {
-                                                    console.log(tooltipNo, 'Closing');
-                                                    $('#' + ownId + '_tooltip').remove();
-                                                });
-                                            } else {
-                                                $('[tid="' + divId + '"]').unbind('mouseover');
-                                                $('[tid="' + divId + '"]').unbind('mouseout');
-                                                enigma.getField(layout.pTourField).then((fld) => {
-                                                    fld.clear()
-                                                });
-                                            }
-                                        })
+							} else {
+								// switch to "off", unbind the events;
+								guided_tour_global.tooltipsCache[ownId].forEach((tooltipDef, tooltipNo) => {
+									const divId = tooltipDef[0].qText;
+									$('[tid="' + divId + '"]').unbind('mouseover');
+									$('[tid="' + divId + '"]').unbind('mouseout');
+								});
+								guided_tour_global.activeTooltip[currSheet][ownId] = -2;
+							}
+						}
+					})
 
-                                    } else {
-                                        // start tour at 1st tooltip
-                                        functions.play(ownId, layout, 0, false, enigma, tours, tooltipsCache, licensed);
-                                    }
-                                })
-                                .catch((err) => functions.leonardoMsg(ownId, 'backendApi.getData Error', JSON.stringify(err), null, 'OK'));
-                        }
+					//---------------------------------------------------
+				} else if (layout.pLaunchMode == 'auto-always') {
+					//---------------------------------------------------
+					// Auto-lauch always ... plays entire tour automatically once per session
+					if (mode == 'analysis' && !guided_tour_global.visitedTours[ownId] && !getActiveTour()) {
+						functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
+							.then(function (hcube) {
+								guided_tour_global.tooltipsCache[ownId] = hcube;
+								functions.play2(ownId, layout, 0, false, enigma, guided_tour_global, currSheet);
+								guided_tour_global.visitedTours[ownId] = true;
+							})
+							.catch(function () { });
+					}
+					// on click, tour will be restarted.
+					$(`#${ownId}_start`).click(function () {
+						if (!getActiveTour()) {
+							functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
+								.then(function (hcube) {
+									guided_tour_global.tooltipsCache[ownId] = hcube;
+									functions.play2(ownId, layout, 0, false, enigma, guided_tour_global, currSheet);
+									guided_tour_global.visitedTours[ownId] = true;
+								})
+								.catch(function () { });
+						}
+					})
+					//---------------------------------------------------
+				} else if (layout.pLaunchMode == 'auto-once') {
+					//---------------------------------------------------
+					// Auto-lauch once ... plays entire tour automatically and remember per user
+					// find out if it is the time to auto-start the tour
+					if (mode == 'analysis' && !getActiveTour()) {
+						enigma.evaluate("=TimeStamp(Now(),'YYYYMMDDhhmmss')").then(function (serverTime) {
+							var lStorageValue = JSON.parse(window.localStorage.getItem(lStorageKey) || lStorageDefault);
+							if (serverTime >= layout.pRelaunchAfter
+								&& layout.pRelaunchAfter > lStorageValue.openedAt) {
+								if (licensed) {
+									functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
+										.then(function (hcube) {
+											guided_tour_global.tooltipsCache[ownId] = hcube;
+											functions.play2(ownId, layout, 0, false, enigma, guided_tour_global, currSheet);
+											lStorageValue.openedAt = serverTime + ''; // save as string
+											window.localStorage.setItem(lStorageKey, JSON.stringify(lStorageValue));
+											if (layout.pConsoleLog) console.log(ownId, 'Stored locally: ', JSON.stringify(lStorageValue));
+										});
 
-                        if (layout.pTourField.length > 0 && fieldExists == '0') {
-                            functions.leonardoMsg(ownId, 'Bad config', `No such field "${layout.pTourField}" in data model.`, null, 'OK');
-                        }
-                        else if (layout.pTourField.length > 0 && valExists == '0') {
-                            functions.leonardoMsg(ownId, 'Bad config', `Field "${layout.pTourField}" has no such value "${layout.pTourSelectVal}".`, null, 'OK');
-                        }
-                        else if (currVal == layout.pTourSelectVal) {
-                            // field has already the right selection, just play the tour
-                            //console.log(`Field ${layout.pTourField} has already selection ${layout.pTourSelectVal}`);
-                            getDataAndPlay();
-                        } else {
-                            // make selection then play the tour
-                            enigma.getField(layout.pTourField)
-                                .then((fld) => {
-                                    fld.select({ qMatch: layout.pTourSelectVal, qSoftLock: false })
-                                        .then((fs) => getDataAndPlay())
-                                        .catch((err) => functions.leonardoMsg(ownId, 'Field Select Error', JSON.stringify(err), null, 'OK'));
-                                })
-                                .catch((err) => functions.leonardoMsg(ownId, 'enigma.getField Error', JSON.stringify(err), null, 'OK'));
-                        }
-                    })
-                        .catch(function (err) {
-                            functions.leonardoMsg(ownId, 'enigma.evaluate Error', JSON.stringify(err), null, 'OK');
-                            console.log('askEnigma', askEnigma);
-                        });
-                } else {
-                    console.log(ownId, 'Button clicked but other tour is active.');
-                }
+								} else {
+									if (layout.pConsoleLog) console.log(ownId, 'auto-once suppressed because no license');
+									if (!guided_tour_global.noLicenseWarning[ownId]) {
+										functions.leonardoMsg(ownId, 'Guided-Tour Extension', noLicenseMsg('Auto-launch Once'), null, 'OK');
+									}
+									guided_tour_global.noLicenseWarning[ownId] = true;
+								}
+								//guided_tour_global.visitedTours[ownId] = true;
+							} else {
+								if (layout.pConsoleLog) console.log(ownId, 'user already launched this tour.');
+							}
+						})
+					} else {
+						if (layout.pConsoleLog) console.log(ownId, 'auto-once suppressed because ' + (mode != 'analysis' ? (mode + '-mode') : 'other tour active'));
+					}
+					// on click, tour will be restarted.
+					$(`#${ownId}_start`).click(function () {
+						if (!getActiveTour()) {
+							functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
+								.then(function (hcube) {
+									guided_tour_global.tooltipsCache[ownId] = hcube;
+									functions.play2(ownId, layout, 0, false, enigma, guided_tour_global, currSheet);
+									enigma.evaluate("=TimeStamp(Now(),'YYYYMMDDhhmmss')").then(function (serverTime) {
+										const lStorageValue = JSON.parse(window.localStorage.getItem(lStorageKey) || lStorageDefault);
+										lStorageValue.openedAt = serverTime + ''; // save as string
+										window.localStorage.setItem(lStorageKey, JSON.stringify(lStorageValue));
+										if (layout.pConsoleLog) console.log(ownId, 'Stored locally: ', JSON.stringify(lStorageValue));
+									})
+									//guided_tour_global.visitedTours[ownId] = true;
+								})
+								.catch(function () { });
+						}
+					})
+					//---------------------------------------------------
+				} else if (layout.pLaunchMode == 'auto-once-p-obj') {
+					//---------------------------------------------------
+					// find out if auto-start of a tooltip is needed
+					if (mode == 'analysis' && !getActiveTour()) {
+						if (licensed) {
+							const lStorageValue = JSON.parse(window.localStorage.getItem(lStorageKey) || lStorageDefault);
+							// function (ownId, enigma, backendApi, objFieldName, tourFieldName, tourFieldVal, timestampFieldName, lStorageVal)
+							// console.log(ownId, 'starting in mode auto-once-p-obj', layout.pTimestampFromDim, lStorageValue)
+							functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal
+								, layout.pTimestampFromDim, lStorageValue)
+								.then(function (hcube) {
+									guided_tour_global.tooltipsCache[ownId] = hcube;
+									if (guided_tour_global.tooltipsCache[ownId].length > 0) {
+										functions.play2(ownId, layout, 0, false, enigma, guided_tour_global, currSheet, lStorageKey, lStorageValue);
+									}
+								})
+								.catch(function () { });
+						} else {
+							if (layout.pConsoleLog) console.log(ownId, 'auto-once-p-obj suppressed because no license');
+							if (!guided_tour_global.noLicenseWarning[ownId]) {
+								functions.leonardoMsg(ownId, 'Guided-Tour Extension', noLicenseMsg("Auto-launch Once Per Tooltip"), null, 'OK');
+							}
+							guided_tour_global.noLicenseWarning[ownId] = true;
+						}
 
-            }
-
-            $(`#${ownId}_start`).click(function () {
-                console.log(ownId, 'clicked on tour start');
-                if (layout.pLaunchMode != 'hover') {
-					handleClick(false)
+					} else {
+						if (layout.pConsoleLog) console.log(ownId, 'auto-once-p-obj suppressed because ' + (mode != 'analysis' ? (mode + '-mode') : 'other tour active'));
+					}
+					// on click, tour will be restarted.
+					$(`#${ownId}_start`).click(function () {
+						if (!getActiveTour()) {
+							functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
+								.then(function (hcube) {
+									guided_tour_global.tooltipsCache[ownId] = hcube;
+									functions.play2(ownId, layout, 0, false, enigma, guided_tour_global, currSheet);
+								})
+								.catch(function () { });
+						}
+					})
 				}
-            });
 
+				return qlik.Promise.resolve();
 
-            $(`#${ownId}_hovermode`).click(() => {
-                if (!licensed) {
-                    $(`#${ownId}_hovermode`).prop('checked', false);
-                    functions.leonardoMsg(ownId, 'Error', 'You have no license for mouse-over mode, sorry. Get in touch with csw@databridge.ch', null, 'OK')
-                } else {
-                    const hoverModeSwitch = $(`#${ownId}_hovermode`).is(':checked');
-                    if (hoverModeSwitch == true) {
-                        handleClick(true, 'register');
-                    } else {
-                        // unregister events
-                        handleClick(true, 'unregister');
-                        console.log('Unregistering events');
-                    }
-                }
-            })
-
-				
-            if (layout.pLaunchMode == 'auto-always'
-                && mode == 'analysis'
-                && !visitedTours[ownId]) {
-                tours[ownId] = 0; // mark the tour as open on 1st tooltip (index 0)
-                $(`#${ownId}_start`).trigger('click');  // trigger a click.
-                visitedTours[ownId] = true;
-            }
-
-
-            if (layout.pLaunchMode == 'auto-once'
-                && mode == 'analysis') {
-                enigma.evaluate("Timestamp(Now(),'YYYYMMDDhhmm')") // get server time
-                    .then(function (currentTime) {
-                        if (currentTime >= layout.pRelaunchAfter
-                            && layout.pRelaunchAfter > lStorageVal.openedAt) {
-                            if (licensed) {
-                                tours[ownId] = 0; // mark the tour as open on 1st tooltip (index 0)
-                                $(`#${ownId}_start`).trigger('click');  // trigger a click.
-                                visitedTours[ownId] = true;
-                            } else {
-                                console.log(ownId, 'Auto-launch of tour supressed because no license');
-                            }
-                        }
-                    })
-            }
-
-
-            return qlik.Promise.resolve();
-
-        }
-    };
-});
+			}
+		};
+	});
