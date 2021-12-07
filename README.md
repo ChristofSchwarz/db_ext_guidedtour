@@ -51,7 +51,6 @@ you can also deliver styles per tooltip (so you have altering colors per tooltip
  * Go to the properties section "Tooltips Texts & Colors" and in the dropdown "More attributes in dimension" choose the dimension you just added.
 
 Those tooltip attributes will overrule the default settings in the "Tooltips Texts & Colors" if provided.
- * a timestamp column with a 14-digit timestamp (text in format YYYYMMDDhhmmss e.g. 20211207150000) 
 
 ## Special Modes of Guided Tour Extension
 
