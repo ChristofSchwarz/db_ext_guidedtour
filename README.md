@@ -22,15 +22,21 @@ Press the button "Select Objects for tour" in the Extension Settings. When you c
 gets a "DONE" button. Click on the PICK buttons in the sequence you want to write help text for them, finally
 click on DONE and copy/paste the IDs to your source table of the tooltip help.
 
+Qlik Container objects are taken care of separately, each tab of a container can be chosen as a target for the tooltip. When the tour plays, it also 
+opens the respective tab in the container.
+
+Advanced users can also use all CSS selectors to position the tooltip (#id, .class, tag-selectors, ...) next to an element in the DOM of the Sense 
+Client page. You may want to use the browser's development tools (F12) for that and you should have experience with css selectors.
+
 ### Choose the mode of operation
 
 If it is the first time, go the default "Click to run tour"
 
 There are 4 more modes (some are premium features and need a license) with advanced behaviours
- * Move mouse over objects (premium) 
- * Auto-launch tour always (standard)
- * Auto-launch tour once (premium)
- * Auto-launch tooltips once (premium)
+ * [Move mouse over objects](./docs/operation-modes.md#move-mouse-over-objects) (premium) 
+ * [Auto-launch tour always](./docs/operation-modes.md#auto-launch-tour-always) (standard)
+ * [Auto-launch tour once](./docs/operation-modes.md#auto-launch-tour-once) (premium)
+ * [Auto-launch tooltips once](./docs/operation-modes.md#auto-launch-tour-once) (premium)
 
 ### Select the right tour if you have multiple
 
@@ -51,22 +57,6 @@ you can also deliver styles per tooltip (so you have altering colors per tooltip
  * Go to the properties section "Tooltips Texts & Colors" and in the dropdown "More attributes in dimension" choose the dimension you just added.
 
 Those tooltip attributes will overrule the default settings in the "Tooltips Texts & Colors" if provided.
-
-## Special Modes of Guided Tour Extension
-
-The **Auto-launch once** will open a tour (in Analysis mode) once per user (actually, per browser, because it remembers that the tour started in the local
-browser storage). The extension compares the last tour visit of the user with a cutoff date set by the application. If that date at a later point of time
-is newer than the last visit, the tour will restart again. That way you can present "What's new" easily.
-
-The **Mouse-over mode** adds a switch icon into the tour button, when it is turned on, the respective tooltip shows when the user moves the mouse over the object
-that the tooltip belongs to. The mouseover events can be disabled (unregistered) by turning the same switch off again. 
-
-## CSS Selectors to position the tooltip
-
-In addition to the Qlik Sense object ids, you can also use **any css selector** (#id, .class, tag-selectors, ...) to point to an element in the DOM of the Sense 
-Client page. You may want to use the browser's development tools (F12) for that and you should have experience with css selectors.
-
-
 
 ## Support of Multi-language
 
