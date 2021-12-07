@@ -15,7 +15,7 @@ requires a license
 The **Mouse-over mode** adds a switch icon into the tour button, when it is turned on, the respective tooltip shows when the user moves the mouse over the object
 that the tooltip belongs to. The mouseover events can be disabled (unregistered) by turning the same switch off again. 
 
-### Auto-launch tour always (standard)
+### Auto-launch tour always
 
 This mode will open a tour (in Analysis mode) once per user and session. It does not record that the user has opened the tour, so the next time the user refreshes 
 the page or comes back another time, the tour will auto-start again.
