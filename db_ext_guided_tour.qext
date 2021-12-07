@@ -14,7 +14,7 @@
         "0.9.7": "12-Nov-2021, Single license Json-string",
         "0.9.8": "23-Nov-2021, Hover-mode for tooltips",
         "0.9.9": "26-Nov-2021, code optimization, support Qlik container object",
-		"1.0.0": "06-Dec-2021, refactoring, support of auto-once-p-obj mode"
+        "1.0.0": "06-Dec-2021, refactoring, support of auto-once-p-obj mode"
     },
     "author": "Christof Schwarz",
     "homepage": "www.databridge.ch",
