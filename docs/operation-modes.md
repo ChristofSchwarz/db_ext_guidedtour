@@ -47,3 +47,5 @@ You have to use an additional column in the tour data table with individual time
  * Go to the properties section "Auto-launch Settings (Obj)" and in the dropdown "Timestamp field for every object" choose the dimension you just added. 
 
 Note: you can also start the entire tour with a click on the tour object and the manual start of the tour is not recorded to the local storage
+
+ [back](../README.md)
