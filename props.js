@@ -193,6 +193,12 @@ define(["jquery", "./functions", "./license", "./picker"], function ($, function
                         defaultValue: 'rgba(0,0,0,0.9)',
                         expression: 'optional'
                     }, {
+                        label: 'Default tooltip width (px)',
+                        type: 'number',
+                        ref: 'pDefaultWidth',
+                        defaultValue: 250,
+                        expression: 'optional'
+                    }, {
                         label: 'More attributes in dimension',
                         component: "dropdown",
                         ref: "pAttrFromDim",
@@ -260,24 +266,6 @@ define(["jquery", "./functions", "./license", "./picker"], function ($, function
                 ], 'pLaunchMode', 'auto-once-p-obj'  // only show settings section if pLaunchMode == 'auto-once-p-obj'
 				), subSection('Advanced Settings', [
                     {
-                        label: 'Font Size',
-                        type: 'string',
-                        ref: 'pFontSize',
-                        defaultValue: '11pt',
-                        expression: 'optional'
-                    }, {
-                        label: 'Default tooltip width (px)',
-                        type: 'number',
-                        ref: 'pDefaultWidth',
-                        defaultValue: 250,
-                        expression: 'optional'
-                    }, {
-                        label: 'Dynamic tooltip width from dim',
-                        component: "dropdown",
-                        ref: "pWidthFromDim",
-                        defaultValue: "",
-                        options: function (arg) { return getDimNames(arg); }
-                    }, {
                         label: function(arg) { return 'Opacity of inactive objects: ' + arg.pOpacity  },
                         type: 'number',
                         ref: 'pOpacity',
@@ -299,19 +287,13 @@ define(["jquery", "./functions", "./license", "./picker"], function ($, function
                         ref: 'pOffsetLeft',
                         defaultValue: 15,
                         expression: 'optional'
-                    } /*, {
-                        label: 'Selector for parent container',
-                        type: 'string',
-                        ref: 'pParentContainer',
-                        defaultValue: '#qv-page-container',
-                        expression: 'optional'
-                    }*/
-                ]), {
-                    type: "boolean",
-                    defaultValue: false,
-                    ref: "pConsoleLog",
-                    label: "console.log debugging info"
-                }
+                    }, {
+						type: "boolean",
+						defaultValue: false,
+						ref: "pConsoleLog",
+						label: "console.log debugging info"
+					}
+                ])
             ]
         },
 
