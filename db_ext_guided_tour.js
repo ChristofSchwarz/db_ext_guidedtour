@@ -29,7 +29,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 			success: function (data) { guided_tour_global.qext = data; }
 		});
 
-		function getActiveTour(ownId, currSheet) {
+		function getActiveTour(ownId, currSheet, layout) {
 			// returns the tour id which is currently active, or false if no tour is active
 			var activeTour = false;
 			for (const sheetId in guided_tour_global.activeTooltip) {
@@ -102,7 +102,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 
 			resize: function ($element, layout) {
 
-				const ownId = this.options.id;
+				const ownId = layout.qInfo.qId;
 				const app = qlik.currApp(this);
 				const enigma = app.model.enigmaModel
 				const licensed = guided_tour_global.licensedObjs[ownId];
@@ -133,7 +133,8 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 			paint: function ($element, layout) {
 
 				var self = this;
-				const ownId = this.options.id;
+				const ownId = layout.qInfo.qId;
+				guided_tour_global.isSingleMode = document.location.href.split('?')[0].split('/').indexOf('single') > -1;
 				const app = qlik.currApp(this);
 				const enigma = app.model.enigmaModel;
 				const currSheet = qlik.navigation.getCurrentSheetId().sheetId;
@@ -170,7 +171,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 					</div>
 					`: '') + `
 					<div id="${ownId}_start" style="${layout.pLaunchMode == 'hover' ? '' : 'cursor:pointer;'} text-align:center;${layout.pMoreStyles}">
-                        <span class="lui-icon  lui-icon--large  ${getActiveTour() == ownId ? 'lui-icon--reload  guided-tour-rotate' : 'lui-icon--play'}" style="${!layout.pShowIcon ? 'display:none;' : ''}" id="${ownId}_play"></span> 
+                        <span class="lui-icon  lui-icon--large  ${getActiveTour(ownId, currSheet, layout) == ownId ? 'lui-icon--reload  guided-tour-rotate' : 'lui-icon--play'}" style="${!layout.pShowIcon ? 'display:none;' : ''}" id="${ownId}_play"></span> 
                         ${layout.pTextStart}
                     </div>
 					<!--div id="${ownId}_test" style="${layout.pLaunchMode == 'hover' ? '' : 'cursor:pointer;'} text-align:center;${layout.pMoreStyles}">
@@ -178,7 +179,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
                     </div-->
 					
                 </div>
-            `);
+            `); 
 
 				$(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor);
 
@@ -191,7 +192,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 					// Standard-Mode ... plays entire tour on click, no auto-launch nor mouse-over
 
 					$(`#${ownId}_start`).click(function () {
-						if (!getActiveTour()) {
+						if (!getActiveTour(ownId, currSheet, layout)) {
 							functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
 								.then(function (hcube) {
 									guided_tour_global.tooltipsCache[ownId] = hcube;
@@ -248,7 +249,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 				} else if (layout.pLaunchMode == 'auto-always') {
 					//---------------------------------------------------
 					// Auto-lauch always ... plays entire tour automatically once per session
-					if (mode == 'analysis' && !guided_tour_global.visitedTours[ownId] && !getActiveTour()) {
+					if (mode == 'analysis' && !guided_tour_global.visitedTours[ownId] && !getActiveTour(ownId, currSheet, layout)) {
 						functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
 							.then(function (hcube) {
 								guided_tour_global.tooltipsCache[ownId] = hcube;
@@ -259,7 +260,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 					}
 					// on click, tour will be restarted.
 					$(`#${ownId}_start`).click(function () {
-						if (!getActiveTour()) {
+						if (!getActiveTour(ownId, currSheet, layout)) {
 							functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
 								.then(function (hcube) {
 									guided_tour_global.tooltipsCache[ownId] = hcube;
@@ -274,7 +275,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 					//---------------------------------------------------
 					// Auto-lauch once ... plays entire tour automatically and remember per user
 					// find out if it is the time to auto-start the tour
-					if (mode == 'analysis' && !getActiveTour()) {
+					if (mode == 'analysis' && !getActiveTour(ownId, currSheet, layout)) {
 						enigma.evaluate("=TimeStamp(Now(),'YYYYMMDDhhmmss')").then(function (serverTime) {
 							var lStorageValue = JSON.parse(window.localStorage.getItem(lStorageKey) || lStorageDefault);
 							if (serverTime >= layout.pRelaunchAfter
@@ -306,7 +307,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 					}
 					// on click, tour will be restarted.
 					$(`#${ownId}_start`).click(function () {
-						if (!getActiveTour()) {
+						if (!getActiveTour(ownId, currSheet, layout)) {
 							functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
 								.then(function (hcube) {
 									guided_tour_global.tooltipsCache[ownId] = hcube;
@@ -326,7 +327,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 				} else if (layout.pLaunchMode == 'auto-once-p-obj') {
 					//---------------------------------------------------
 					// find out if auto-start of a tooltip is needed
-					if (mode == 'analysis' && !getActiveTour()) {
+					if (mode == 'analysis' && !getActiveTour(ownId, currSheet, layout)) {
 						if (licensed) {
 							const lStorageValue = JSON.parse(window.localStorage.getItem(lStorageKey) || lStorageDefault);
 							// function (ownId, enigma, backendApi, objFieldName, tourFieldName, tourFieldVal, timestampFieldName, lStorageVal)
@@ -353,7 +354,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 					}
 					// on click, tour will be restarted.
 					$(`#${ownId}_start`).click(function () {
-						if (!getActiveTour()) {
+						if (!getActiveTour(ownId, currSheet, layout)) {
 							functions.cacheHypercube(ownId, enigma, objFieldName, layout.pTourField, layout.pTourSelectVal)
 								.then(function (hcube) {
 									guided_tour_global.tooltipsCache[ownId] = hcube;
