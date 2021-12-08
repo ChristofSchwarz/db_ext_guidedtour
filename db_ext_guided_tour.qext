@@ -3,7 +3,7 @@
     "type": "visualization",
     "description": "Extension to show tooltips tours over Qlik Sense objects",
     "icon": "play",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "changehistory": {
         "0.9.0": "30-Oct-2021, initial version",
         "0.9.2": "01-Nov-2021, allow also css selectors for placing the tooltip",
@@ -14,7 +14,8 @@
         "0.9.7": "12-Nov-2021, Single license Json-string",
         "0.9.8": "23-Nov-2021, Hover-mode for tooltips",
         "0.9.9": "26-Nov-2021, code optimization, support Qlik container object",
-        "1.0.0": "06-Dec-2021, refactoring, support of auto-once-p-obj mode"
+        "1.0.0": "06-Dec-2021, refactoring, support of auto-once-p-obj mode",
+        "1.0.1": "07-Dec-2001, fix for single-mode"
     },
     "author": "Christof Schwarz",
     "homepage": "www.databridge.ch",
