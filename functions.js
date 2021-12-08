@@ -200,7 +200,7 @@ define(["jquery", "./license"], function ($, license) {
 				var qObjId = currElem[0].qText;
 				var html = currElem[1].qText;
 				
-				var tooltipStyle = `width:300px;color:${layout.pFontColor};background-color:${layout.pBgColor};` ;
+				var tooltipStyle = `width:${layout.pDefaultWidth}px;color:${layout.pFontColor};background-color:${layout.pBgColor};` ;
 				
 				var attr = {};
 				try {
