@@ -133,7 +133,7 @@ define(["jquery", "./license"], function ($, license) {
 	function play2(ownId, layout, tooltipNo, reset, enigma, guided_tour_global, currSheet, lStorageKey, lStorageVal) {
 		//=========================================================================================
 		const arrowHeadSize = layout.pArrowHead || 16;
-		const rootContainer = '#qv-page-container'; /*layout.pParentContainer */
+		const rootContainer = guided_tour_global.isSingleMode ? '#qv-stage-container' : '#qv-page-container'; 
 		const finallyScrollTo = '#sheet-title';
 		const opacity = layout.pLaunchMode == 'hover' ? 1 : (layout.pOpacity || 1);
 		const licensed = guided_tour_global.licensedObjs[ownId];
@@ -220,9 +220,9 @@ define(["jquery", "./license"], function ($, license) {
 					// qlik object id format
 					//console.log(ownId + ' Qlik object:', qObjId);
 					selectorFormat = 'qlik-object';
-					selector = `[tid="${qObjId}"]`;
+					selector = guided_tour_global.isSingleMode ? `[data-qid="${qObjId}"]` : `[tid="${qObjId}"]`;
 					fadeSelector = selector;
-					knownObjId = $(`[tid="${qObjId}"]`).length;
+					knownObjId = $(selector).length;
 
 				} else if (qObjId.indexOf('[data-itemid=') > -1) {
 					selectorFormat = 'qlik-container';
@@ -269,7 +269,7 @@ define(["jquery", "./license"], function ($, license) {
 					// add the tooltip div
 					
 					$(rootContainer).append(`
-                    <div class="lui-tooltip" id="${ownId}_tooltip" style="${tooltipStyle};display:none;position:absolute;">
+                    <div class="lui-tooltip  guided-tour-toolip-parent" id="${ownId}_tooltip" style="${tooltipStyle};display:none;position:absolute;">
 					    <!--${selector}-->
                         <span style="opacity:0.6;">${tooltipNo + 1}/${guided_tour_global.tooltipsCache[ownId].length}</span>
                         <span class="lui-icon  lui-icon--close" style="float:right;cursor:pointer;${layout.pLaunchMode=='hover'?'opacity:0;':''}" id="${ownId}_quit"></span>
