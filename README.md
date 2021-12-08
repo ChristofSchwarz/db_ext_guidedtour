@@ -1,6 +1,6 @@
 # GuidedTour Extension for Qlik Sense Client
 
-&lsqb;[Version History](./db_ext_guided_tour.qext)]&rsqb;&nbsp;
+&lsqb;[Version History](./db_ext_guided_tour.qext)&rsqb;&nbsp;
 &lsqb;[Found a bug?](https://github.com/ChristofSchwarz/db_ext_guidedtour/issues)&rsqb;&nbsp;
 &lsqb;[License](./docs/licensing.md)&rsqb;
 
