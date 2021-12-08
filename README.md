@@ -72,4 +72,5 @@ Read more [here](./docs/licensing.md)
 ## Known limitations
 
  * In small-device mode of the Sense Client, the tooltips do not render nicely.
+ * Hover-mode doesn't work in /single integration
  * Currently Internet Explorer is not supported
