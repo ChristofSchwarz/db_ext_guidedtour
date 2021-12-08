@@ -17,7 +17,7 @@ which needs to be put into the extension itself:
 <img src="../pics/licensing(2).png" width="450">
 </p>
 
-If you will use multiple times the Guided Tour extension, put the license itself into a variable and refer to it from within the extension settings
+If you will use the Guided Tour extension **multiple times**, put the license itself into a variable and refer to it from within the extension settings
 ```
 SET vGuidedTourLicense = {"*.databridge.ch":[13728457009,6725660]};
 ```
