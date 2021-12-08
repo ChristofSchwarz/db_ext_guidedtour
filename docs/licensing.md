@@ -2,6 +2,9 @@
 
 go to [Main](../README.md)
 
+To get a license, please send an email to insight-sales@databridge.ch. The price is 199 USD per year. You can cancel after year one and continue to use the 
+license-free features.
+
 We license the server url (one * wildcard allowed), so that a license is valid for **one environment** and indepenent from #users and #apps which use it.
 If you have multiple nodes or DNS synonyms for the same environment, we can combine multiple host names into one license.
 With your transaction, you will get a license string (in Json format) from databridge like the below examples:
