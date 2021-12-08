@@ -14,7 +14,7 @@ With your transaction, you will get a license string (in Json format) from datab
 
 which needs to be put into the extension itself:
 <p align="center">
-<img src="./pics/licensing(2).png" width="450">
+<img src="../pics/licensing(2).png" width="450">
 </p>
 
 If you will use multiple times the Guided Tour extension, put the license itself into a variable and refer to it from within the extension settings
