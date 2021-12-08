@@ -1,6 +1,8 @@
 # GuidedTour Extension for Qlik Sense Client
 
-[Version History](./db_ext_guided_tour.qext) [Found a bug?](https://github.com/ChristofSchwarz/db_ext_guidedtour/issues) [License](./docs/licensing.md)
+&lsqb;[Version History](./db_ext_guided_tour.qext)]&rsqb; 
+&lsqb;[Found a bug?](https://github.com/ChristofSchwarz/db_ext_guidedtour/issues)>&rsqb; 
+&lsqb;[License](./docs/licensing.md)&rsqb;
 
 This extension allows to make a tour of styleable tooltips (text bubbles) which highlight certain objects on a worksheet. 
 
