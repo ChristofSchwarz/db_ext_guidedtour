@@ -117,14 +117,14 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 				if ($(`#${ownId}_tooltip`).length > 0) {
 					// get the target-selector from a html comment inside the tooltip
 					const oldSelector = $(`#${ownId}_tooltip`).html().split('-->')[0].split('<!--')[1] || '';
-					const newPos = functions.findPositions2(oldSelector, rootContainer, `#${ownId}_tooltip`
-						, layout, $(`#${ownId}_tooltip`).css('background-color'));
-					//console.log(newPos[0],newPos[1],newPos[2]);	
+					const calcPositions = functions.findPositions2(oldSelector, rootContainer, `#${ownId}_tooltip`
+						, layout, $(`#${ownId}_tooltip`).css('background-color'));    
 					$(`#${ownId}_tooltip`)
-						.css(newPos[0][0], newPos[0][1])
-						.css(newPos[1][0], newPos[1][1]);
+ 						.css('left', calcPositions.left).css('right',calcPositions.right)  // left or right
+                        .css('top', calcPositions.top).css('bottom',calcPositions.bottom);  // top or bottom
 					$('.guided-tour-arrowhead').remove(); // the arrowhead may have changed toother edge; remove the old
-					if (newPos[2]) $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(newPos[2]);
+					if (calcPositions.arrow) $(`#${ownId}_tooltip .lui-tooltip__arrow`).after(calcPositions.arrow);  // arrowhead
+
 				}
 				
 				return qlik.Promise.resolve();
@@ -158,7 +158,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
 				const switchPosition = $('#' + ownId + '_hovermode').is(':checked') ? 'checked' : '';
 
 				$element.html(`
-                <div id="${ownId}_parent" style="height:100%;display:flex;justify-content:center;align-items:center;${layout.pExtensionFontColor.length > 0 ? ('color:' + layout.pExtensionFontColor) : ''}">`
+                <div id="${ownId}_parent" style="height:100%;display:flex;justify-content:center;align-items:center;color:${layout.pExtensionFontColor};background-color:${layout.pExtensionBgColor}">`
 					+ (layout.pLaunchMode == 'hover' ? `
 					<div class="lui-switch" style="margin-right:9px;">
 					  <label class="lui-switch__label">
@@ -181,7 +181,7 @@ define(["qlik", "jquery", "text!./styles.css", "./props", "./functions", "./lice
                 </div>
             `); 
 
-				$(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor);
+				$(`[tid="${ownId}"] .qv-inner-object`).css('background-color', layout.pExtensionBgColor); // set bg-color in Sense Client
 
 				guided_tour_global.licensedObjs[ownId] = license.chkLicenseJson(layout.pLicenseJSON, 'db_ext_guided_tour');
 				const licensed = guided_tour_global.licensedObjs[ownId];
