@@ -154,12 +154,14 @@ define(["jquery", "./functions", "./license", "./picker"], function ($, function
                         label: 'Font-color of button',
                         type: 'string',
                         ref: 'pExtensionFontColor',
-                        expression: 'optional'
+                        expression: 'optional',
+						defaultValue: '#333333'
                     }, {
                         label: 'Background-color of button',
                         type: 'string',
                         ref: 'pExtensionBgColor',
-                        expression: 'optional'
+                        expression: 'optional',
+						defaultValue: 'white'
                     }, {
                         label: 'More styling',
                         type: 'string',
@@ -275,18 +277,6 @@ define(["jquery", "./functions", "./license", "./picker"], function ($, function
                         max: 1,
                         step: 0.1,
 						show: function(arg) { return arg.pLaunchMode != 'hover' }
-                    }, {
-                        label: 'Offset when top (px)',
-                        type: 'number',
-                        ref: 'pOffsetTop',
-                        defaultValue: 10,
-                        expression: 'optional'
-                    }, {
-                        label: 'Offset when left (px)',
-                        type: 'number',
-                        ref: 'pOffsetLeft',
-                        defaultValue: 15,
-                        expression: 'optional'
                     }, {
 						type: "boolean",
 						defaultValue: false,
