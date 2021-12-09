@@ -3,7 +3,16 @@
     "type": "visualization",
     "description": "Extension to show tooltips tours over Qlik Sense objects",
     "icon": "play",
-    "version": "1.0.2",
+    "author": "Christof Schwarz",
+    "homepage": "www.databridge.ch",
+    "keywords": "qlik-sense, visualization",
+    "license": "MIT",
+    "repository": "https://github.com/ChristofSchwarz/qs_ext_guidedtour",
+    "preview": "pics/databridgelogo.png",
+    "dependencies": {
+        "qlik-sense": ">=3.0.x"
+    },	
+    "version": "1.0.3",
     "changehistory": {
         "0.9.0": "30-Oct-2021, initial version",
         "0.9.2": "01-Nov-2021, allow also css selectors for placing the tooltip",
@@ -15,15 +24,7 @@
         "0.9.8": "23-Nov-2021, Hover-mode for tooltips",
         "0.9.9": "26-Nov-2021, code optimization, support Qlik container object",
         "1.0.0": "06-Dec-2021, refactoring, support of auto-once-p-obj mode",
-        "1.0.1": "07-Dec-2001, fix for single-mode"
-    },
-    "author": "Christof Schwarz",
-    "homepage": "www.databridge.ch",
-    "keywords": "qlik-sense, visualization",
-    "license": "MIT",
-    "repository": "https://github.com/ChristofSchwarz/qs_ext_guidedtour",
-    "preview": "pics/databridgelogo.png",
-    "dependencies": {
-        "qlik-sense": ">=3.0.x"
+        "1.0.1": "07-Dec-2001, fix for single-mode",
+        "1.0.3": "09-Dec-2001, fix for background-color and fix positioning of large tooltips"
     }
 }
