@@ -18,7 +18,8 @@
         "1.0.0": "06-Dec-2021, refactoring, support of auto-once-p-obj mode",
         "1.0.1": "07-Dec-2021, fix for single-mode",
         "1.0.3": "09-Dec-2021, fix for background-color and fix positioning of large tooltips",
-        "1.0.4": "17-Dec-2021, added orient(ation) preference in attribute, remove the need to specify column for attribute (it is the 3rd dimension always)"
+        "1.0.4": "17-Dec-2021, added orient(ation) preference in attribute, remove the need to specify column for attribute (it is the 3rd dimension always)",
+        "1.0.5": "07-Jan-2022, Bugfix select for timestamp field wasnt showing in Show-Tooltip-Once mode"
     },
     "icon": "play",
     "preview": "pics/databridgelogo.png",
