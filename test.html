@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<!--
+  <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+  <script type="text/javascript">
+  tinymce.init({
+    selector: '#myeditablediv',
+    inline: true
+  });
+  </script>
+-->
+</head>
+
+<body>
+<!--
+  <h1>TinyMCE Inline Editing Mode Guide</h1>
+  <form method="post">
+    <div id="myeditablediv">Click here to edit!</div>
+  </form>
+-->  
+  <div id="editor">
+	  <p>Hello World!</p>
+	  <p>Some initial <strong>bold</strong> text</p>
+	  <p><br></p>
+	</div>
+	<!-- Initialize Quill editor -->
+<script>
+  var quill = new Quill('#editor', {
+    theme: 'snow'
+  });
+</script>
+</body>
+</html>
