@@ -9,4 +9,4 @@ git remote add origin git@github.com:ChristofSchwarz/db_ext_guidedtour.git
 # Every time
 git add .
 git commit -m "updates" 
-git push -u origin main
+git push -u origin master
