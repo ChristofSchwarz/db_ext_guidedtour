@@ -6,7 +6,7 @@
 
 This extension allows to make a tour of styleable tooltips (text bubbles) which highlight certain objects on a worksheet. 
 
- ![screenshot](https://github.com/ChristofSchwarz/pics/raw/master/GuidedTour.gif "Animation")
+ ![screenshot](./pics/GuidedTourAnimated.gif "Animation")
 
 
 ## Getting started
